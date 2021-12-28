@@ -53,8 +53,8 @@ class EventService:
     def delete_all(self, username):
         self.dao.delete_all(username)
 
-    def find_last_statistic_events(self, username):
-        self.dao.find_last_events_statistics(username, )
+    def find_last_statistic_events(self, username: str, limit: int):
+        self.dao.find_last_events_statistics(username, limit)
 
 
 class StatisticsService:
@@ -71,6 +71,7 @@ class StatisticsService:
             from_d = time.minus(until_datetime, months=months, weeks=weeks, days=days).date()
             until_d = until_datetime.date()
 
+        assert from_d <= until_d
         statistic: list = self.event_dao.find_statistic_for_date_range(username, from_d, until_d)
         activity_statistic: list = [ActivityStatistics.from_statistic(s) for s in statistic]
 
