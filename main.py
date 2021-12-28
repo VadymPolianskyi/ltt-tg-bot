@@ -322,7 +322,7 @@ def getMessage():
 @server.route("/")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url='https://https://ltt-tg-bot.herokuapp.com/' + config.BOT_API_KEY)
+    bot.set_webhook(url='https://ltt-tg-bot.herokuapp.com/' + config.BOT_API_KEY)
     return "!", 200
 
 
