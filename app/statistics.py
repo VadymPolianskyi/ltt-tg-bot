@@ -22,7 +22,7 @@ class ActivityStatistics:
 
     def to_str(self, with_date=False):
         date_str = f'({self.from_date} - {self.until_date})' if with_date else ''
-        return f'{self.activity_name} - {self.format_spent_minutes()} {date_str}'
+        return f'{self.activity_name} - {self.format_spent_minutes()} / {self.counter} time(s) {date_str}'
 
     def format_spent_minutes(self) -> str:
         spent_hours = int(self.spent_minutes / 60)
