@@ -1,12 +1,15 @@
 import json
 
 import telebot
+from flask import Flask, request
+import os
 
 from app.config import config, msg
 from app.db import EventType
 from app.service import ActivityService, EventService, StatisticsService
 from app.util import time, markup
 
+server = Flask(__name__)
 bot = telebot.TeleBot(config.BOT_API_KEY, parse_mode="MARKDOWN")
 activities = ActivityService()
 events = EventService()
@@ -304,5 +307,26 @@ def __statistic_post_answer(message):
         bot.send_message(message.chat.id, msg.ERROR_BASIC)
 
 
-if __name__ == '__main__':
-    bot.polling()
+##############################
+#       APP LAUNCHING        #
+##############################
+
+@server.route('/' + config.BOT_API_KEY, methods=['POST'])
+def getMessage():
+    json_string = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
+    return "!", 200
+
+
+@server.route("/")
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url='https://https://ltt-tg-bot.herokuapp.com/' + config.BOT_API_KEY)
+    return "!", 200
+
+
+if __name__ == "__main__":
+    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+# if __name__ == '__main__':
+#     bot.polling(none_stop=True)
