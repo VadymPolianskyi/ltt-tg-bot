@@ -22,9 +22,11 @@ class ActivityService:
         self.dao.delete(username, activity_name)
 
     def show_all(self, username: str) -> list:
+        print("Show all activities")
         return self.dao.find_all_by_username(username)
 
     def show_all_titles(self, username: str) -> list:
+        print("Show all titles")
         return [a.name for a in self.show_all(username)]
 
 

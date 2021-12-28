@@ -65,10 +65,12 @@ class ActivityDao:
         connection.commit()
 
     def find_all_by_username(self, username: str):
+        print(f"Select all activities for username '{username}")
         with connection.cursor() as cursor:
             sql_query = f"SELECT * FROM `{self.table_name}` WHERE username=%s;".replace("'", "")
 
             cursor.execute(sql_query, username)
+            print("Successfully selected")
             return [Activity(name=r['name'], username=r['username'], created=r['created'], id=r['id']) for r in
                     cursor.fetchall()]
 
