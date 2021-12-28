@@ -195,7 +195,7 @@ def __track_post_time_answer(message, activity: str):
         bot.send_message(message.chat.id, msg.ERROR_BASIC)
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start_tracking'])
 def start_tracking(message):
     print(f"Message '{message.text}' from @{message.chat.username} in chat({message.chat.id})")
     try:
@@ -221,7 +221,7 @@ def __start_tracking_post_answer(chat_id: str, activity: str, username: str, mes
         bot.send_message(chat_id, msg.ERROR_BASIC)
 
 
-@bot.message_handler(commands=['stop'])
+@bot.message_handler(commands=['stop_tracking'])
 def start_tracking(message):
     print(f"Message '{message.text}' from @{message.chat.username} in chat({message.chat.id})")
     try:

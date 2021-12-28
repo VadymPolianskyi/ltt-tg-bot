@@ -3,8 +3,8 @@ ADD_ACTIVITY_COMMAND = "add\_activity"
 DELETE_ACTIVITY_COMMAND = "delete\_activity"
 
 TRACK_COMMAND = "track"
-START_COMMAND = "start"
-STOP_COMMAND = "stop"
+START_COMMAND = "start\_tracking"
+STOP_COMMAND = "stop\_tracking"
 
 CLEAR_COMMAND = "clear"
 
