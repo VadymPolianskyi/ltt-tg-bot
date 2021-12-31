@@ -69,6 +69,19 @@ STOP_TRACKING_2_1 = CHOOSE_ACTIVITY
 STOP_TRACKING_2_2 = FINISHED_TRACKING
 STOP_TRACKING_3_1 = f""" Oh, I can't stop NOTHING. Please start activity by /{START_COMMAND}, or track already finished activity with /{TRACK_COMMAND} command."""
 
+# /delete_last
+
+DELETE_LAST_EVENT_1 = CHOOSE_ACTIVITY
+DELETE_LAST_EVENT_2 = "Your last event: {}"
+DELETE_LAST_EVENT_3_1 = "Event deleted - {}"
+DELETE_LAST_EVENT_4_1 = "Deletion is canceled."
+
+
+# /show_last
+
+SHOW_LAST_1 = "Please, write a number how many last events you want to see. Max number: `20`."
+SHOW_LAST_2 = "Your last `{}` tracked events:\n{}"
+
 # /statistics
 
 STATISTIC_1 = "Please write period \n Example: `1D`, `1W`, `1M` for last time range, or `01.01.2021 - 05.01.2021`"

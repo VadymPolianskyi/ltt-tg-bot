@@ -40,9 +40,18 @@ def callback_handler(call):
             __delete_activity_before_vote(chat_id=chat_id, message_id=message_id, activity_name=activity_name)
 
         if 'delete_vote' in callback_inp.keys():
-            activity_name = callback_inp['activity']
+            activity_name = callback_inp['payload']
             vote = callback_inp['delete_vote']
             __delete_activity_after_vote(chat_id, message_id, username, activity_name, vote)
+
+        if 'delete_event' in callback_inp.keys():
+            activity_name = callback_inp['delete_event']
+            __delete_last_tracking_before_vote(chat_id, message_id, username, activity_name)
+
+        if 'delete_event_vote' in callback_inp.keys():
+            activity_name = callback_inp['payload']
+            vote = callback_inp['delete_event_vote']
+            __delete_last_tracking_after_vote(chat_id, message_id, vote, username, activity_name)
 
         if 'clear_vote' in callback_inp.keys():
             vote = callback_inp['clear_vote']
@@ -199,8 +208,9 @@ def __track_post_time_answer(message, activity: str):
 def start_tracking(message):
     print(f"Message '{message.text}' from @{message.chat.username} in chat({message.chat.id})")
     try:
-        started = events.all_started_activities(message.chat.username)
-        all_user_activity_titles = [a for a in activities.show_all_titles(message.chat.username) if a not in started]
+        started_titles = activities.all_started_activity_titles(message.chat.username)
+        all_user_activity_titles = [a for a in activities.show_all_titles(message.chat.username) if
+                                    a not in started_titles]
 
         activities_keyboard = markup.create_inline_markup('start_tracking', all_user_activity_titles)
 
@@ -225,7 +235,7 @@ def __start_tracking_post_answer(chat_id: str, activity: str, username: str, mes
 def start_tracking(message):
     print(f"Message '{message.text}' from @{message.chat.username} in chat({message.chat.id})")
     try:
-        started_activities = events.all_started_activities(message.chat.username)
+        started_activities = activities.all_started_activity_titles(message.chat.username)
         if len(started_activities) == 1:
             __stop_tracking_post_answer(chat_id=message.chat.id, activity=started_activities[0],
                                         username=message.chat.username)
@@ -244,12 +254,85 @@ def __stop_tracking_post_answer(chat_id: str, activity: str, username: str, mess
         if message_id:
             bot.delete_message(chat_id=chat_id, message_id=message_id)
 
+        print(f'Stop tracking activity({activity}) for user({username})')
+
         e_start = events.find_last(username, activity, EventType.START)
         e_stop = events.create(username=username, activity_name=activity, event_type=EventType.STOP, last=e_start.id)
 
         hours, minutes = time.count_difference(e_start.time, e_stop.time)
 
         bot.send_message(chat_id, msg.STOP_TRACKING_2_2.format(activity, hours, minutes))
+    except Exception as e:
+        print(e)
+        bot.send_message(chat_id, msg.ERROR_BASIC)
+
+
+######################
+#       EVENT        #
+######################
+
+@bot.message_handler(commands=['show_last'])
+def show_last(message):
+    print(f"Message '{message.text}' from @{message.chat.username} in chat({message.chat.id})")
+    try:
+        bot.send_message(message.chat.id, msg.SHOW_LAST_1)
+        bot.register_next_step_handler_by_chat_id(message.chat.id, __show_last_post_answer)
+    except Exception as e:
+        print(e)
+        bot.send_message(message.chat.id, msg.ERROR_BASIC)
+
+
+def __show_last_post_answer(message):
+    try:
+        username = message.chat.username
+        answ: str = message.text
+
+        last_events_statistics: str = statistics_service.last_events_statistics(username, answ)
+        bot.send_message(message.chat.id, msg.SHOW_LAST_2.format(answ, last_events_statistics))
+    except Exception as e:
+        print(e)
+        bot.send_message(message.chat.id, msg.ERROR_BASIC)
+
+
+@bot.message_handler(commands=['delete_last'])
+def delete_last_tracking(message):
+    print(f"Message '{message.text}' from @{message.chat.username} in chat({message.chat.id})")
+    try:
+
+        activities_keyboard = markup.create_inline_markup('delete_event',
+                                                          activities.show_all_titles(message.chat.username))
+
+        bot.send_message(message.chat.id, msg.DELETE_LAST_EVENT_1, reply_markup=activities_keyboard)
+    except Exception as e:
+        print(e)
+        bot.send_message(message.chat.id, msg.ERROR_BASIC)
+
+
+def __delete_last_tracking_before_vote(chat_id: str, message_id: int, username: str, activity_name: str):
+    try:
+        bot.delete_message(chat_id=chat_id, message_id=message_id)
+
+        stop_event, start_event, statistics = events.find_last_events_pair(username, activity_name)
+        statistics_data = statistics.to_str(with_counter=False)
+
+        vote_keyboard = markup.create_activity_voter_markup('delete_event', data=activity_name)
+        bot.send_message(chat_id=chat_id, text=msg.DELETE_LAST_EVENT_2.format(statistics_data),
+                         reply_markup=vote_keyboard)
+    except Exception as e:
+        print(e)
+        bot.send_message(chat_id, msg.ERROR_BASIC)
+
+
+def __delete_last_tracking_after_vote(chat_id: str, message_id: int, vote: str, username: str, activity_name: str):
+    try:
+        bot.delete_message(chat_id, message_id)
+
+        if vote == "Yes":
+            stop_event, start_event, statistics = events.find_last_events_pair(username, activity_name)
+            events.delete(stop_event.id, start_event.id)
+            bot.send_message(chat_id, msg.DELETE_LAST_EVENT_3_1.format(statistics.to_str(with_counter=False)))
+        else:
+            bot.send_message(chat_id, msg.DELETE_LAST_EVENT_4_1)
     except Exception as e:
         print(e)
         bot.send_message(chat_id, msg.ERROR_BASIC)
@@ -310,20 +393,22 @@ def __statistic_post_answer(message):
 #       APP LAUNCHING        #
 ##############################
 
-@server.route('/' + config.BOT_API_KEY, methods=['POST'])
-def get_message():
-    json_string = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_string)
-    bot.process_new_updates([update])
-    return "!", 200
+bot.polling(none_stop=True)
 
-
-@server.route("/")
-def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url='https://ltt-tg-bot.herokuapp.com/' + config.BOT_API_KEY)
-    return "!", 200
-
-
-if __name__ == "__main__":
-    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+# @server.route('/' + config.BOT_API_KEY, methods=['POST'])
+# def get_message():
+#     json_string = request.get_data().decode('utf-8')
+#     update = telebot.types.Update.de_json(json_string)
+#     bot.process_new_updates([update])
+#     return "!", 200
+#
+#
+# @server.route("/")
+# def webhook():
+#     bot.remove_webhook()
+#     bot.set_webhook(url='https://ltt-tg-bot.herokuapp.com/' + config.BOT_API_KEY)
+#     return "!", 200
+#
+#
+# if __name__ == "__main__":
+#     server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
