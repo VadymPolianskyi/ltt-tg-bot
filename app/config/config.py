@@ -12,7 +12,7 @@ DB_NAME = config['DB']['Database']
 DB_USERNAME = os.environ.get("DB_USERNAME")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
 
-DB_TABLE_ACTIVITY = config['TABLE']['Activity']
-DB_TABLE_EVENT = config['TABLE']['Event']
+DB_TABLE_ACTIVITY = os.environ.get("ACTIVITY_TABLE")
+DB_TABLE_EVENT = os.environ.get("EVENT_TABLE")
 
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
