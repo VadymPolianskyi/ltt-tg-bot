@@ -4,4 +4,4 @@ Telegram Bot that tracks time spent for different activities of user and then ca
 https://t.me/LifeTimeTrackerBot
 
 ### Git Workflow
-`dev` -> `deploy` -> `master`
+`feature_branch` -> `dev` -> `staging` -> `master`

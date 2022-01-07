@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 
-import app.util.time as time
-from app.db import ActivityDao, Activity, EventDao, EventType, Event
+import app.util.time as time_service
+from app.db import ActivityDao, Activity, EventDao, EventType, Event, StatisticsSelector
 from app.statistics import FullStatistics, ActivityStatistics
 
 
@@ -11,23 +11,31 @@ class ActivityService:
         self.dao = ActivityDao()
         self.event_dao = EventDao()
 
-    def create(self, username: str, activity_name: str) -> Activity:
-        a = Activity(username=username, name=activity_name)
+    def create(self, user_id: int, activity_name: str) -> Activity:
+        print(f"Create activity({activity_name}) for user({str(user_id)})")
+        a = Activity(user_id=user_id, name=activity_name)
         self.dao.save(a)
         return a
 
-    def delete(self, username: str, activity_name: str):
-        a = self.dao.find_by_username_and_name(username, activity_name)
-        self.event_dao.delete_all_by_activity(username, a.id)
-        self.dao.delete(username, activity_name)
+    def delete(self, user_id: int, activity_name: str):
+        print(f"Delete all  activity({activity_name}) events for user({str(user_id)})")
+        a = self.dao.find_by_user_id_and_name(user_id, activity_name)
+        self.event_dao.delete(user_id, a.id)
+        self.dao.delete(user_id, a.name)
 
-    def show_all(self, username: str) -> list:
-        print("Show all activities")
-        return self.dao.find_all_by_username(username)
+    def show_all(self, user_id: int) -> list:
+        print(f"Show all activities for user({str(user_id)})")
+        return self.dao.find_all_by_user_id(user_id)
 
-    def show_all_titles(self, username: str) -> list:
-        print("Show all titles")
-        return [a.name for a in self.show_all(username)]
+    def show_all_titles(self, user_id: int) -> list:
+        print(f"Show all titles for user({str(user_id)})")
+        return [a.name for a in self.show_all(user_id)]
+
+    def all_started_activity_titles(self, user_id: int) -> list:
+        print(f"Find last started activities for user({str(user_id)})")
+        started_activities = self.dao.find_last_started(user_id)
+        print(f'Found {len(started_activities)} started activities for user({str(user_id)})')
+        return [a.name for a in started_activities]
 
 
 class EventService:
@@ -35,44 +43,56 @@ class EventService:
         self.dao = EventDao()
         self.activity_dao = ActivityDao()
 
-    def create(self, username: str, activity_name: str, event_type: EventType, last: str = None, time=None) -> Event:
-        a = self.activity_dao.find_by_username_and_name(username, activity_name)
+    def create(self, user_id: int, activity_name: str, event_type: EventType, last: str = None, time=None) -> Event:
+        a = self.activity_dao.find_by_user_id_and_name(user_id, activity_name)
         if not last:
-            last_event = self.find_last(username, activity_name, EventType.STOP)
+            last_event = self.find_last(user_id, activity_name, EventType.STOP)
             last = "first" if not last_event else last_event.id
-        e = Event(activity_id=a.id, event_type=event_type, time=time, last=last, username=username)
+        e = Event(activity_id=a.id, event_type=event_type, time=time, last=last, user_id=user_id)
         self.dao.save(e)
+        print(f'Created {e}')
         return e
 
-    def find_last(self, username: str, activity_name: str, event_type: EventType) -> Optional[Event]:
-        return self.dao.find_last_event_for_user_activity(username, activity_name, event_type)
+    def find_last(self, user_id: int, activity_name: str, event_type: EventType) -> Optional[Event]:
+        return self.dao.find_last_event_for_activity(user_id, activity_name, event_type)
 
-    def all_started_activities(self, username) -> list:
-        return [self.activity_dao.find_by_id(a_id).name for a_id in self.dao.find_last_started(username)]
-
-    def delete_all(self, username):
-        self.dao.delete_all(username)
-
-    def find_last_statistic_events(self, username: str, limit: int):
-        self.dao.find_last_events_statistics(username, limit)
+    def delete(self, *event_ids):
+        self.dao.delete(*event_ids)
 
 
 class StatisticsService:
     def __init__(self):
         self.event_dao = EventDao()
 
-    def generate(self, username, date_range_str) -> FullStatistics:
-        extracted_date_range = time.extract_date_range(date_range_str)
+    def generate(self, user_id: int, date_range_str) -> FullStatistics:
+        print(f'Generate statistic for user({user_id}) for {date_range_str}')
+        extracted_date_range = time_service.extract_date_range(date_range_str)
         if extracted_date_range:
             from_d, until_d = extracted_date_range
         else:
-            days, weeks, months = time.extract_days_weeks_months(date_range_str)
+            days, weeks, months = time_service.extract_days_weeks_months(date_range_str)
             until_datetime = datetime.now()
-            from_d = time.minus(until_datetime, months=months, weeks=weeks, days=days).date()
+            from_d = time_service.minus(until_datetime, months=months, weeks=weeks, days=days).date()
             until_d = until_datetime.date()
 
         assert from_d <= until_d
-        statistic: list = self.event_dao.find_statistic_for_date_range(username, from_d, until_d)
+        statistic: list = StatisticsSelector(user_id) \
+            .from_date(from_d) \
+            .to_date(until_d) \
+            .order_from_newest() \
+            .select()
         activity_statistic: list = [ActivityStatistics.from_statistic(s) for s in statistic]
 
         return FullStatistics(activity_statistic=activity_statistic, from_d=from_d, until_d=until_d)
+
+    def last_events_statistics(self, user_id: int, limit: int = None, ) -> list:
+        print(f"Find last {limit} events for user({str(user_id)})")
+
+        last_events_statistics = StatisticsSelector(user_id) \
+            .limit(limit) \
+            .order_from_newest() \
+            .select()
+
+        statistics = [ActivityStatistics.from_statistic(es) for es in last_events_statistics]
+
+        return statistics
