@@ -6,7 +6,7 @@ TRACK_COMMAND = "track"
 START_COMMAND = "start\_tracking"
 STOP_COMMAND = "stop\_tracking"
 
-CLEAR_COMMAND = "clear"
+LAST_EVENTS_COMMAND = "last\_events"
 
 STATISTICS_COMMAND = "statistics"
 
@@ -24,12 +24,11 @@ I work with the next commands:
 /{START_COMMAND} - start a new event for your activity
 /{STOP_COMMAND} - stop the started event
 
-/{CLEAR_COMMAND} - clear all events for all activities
+/{LAST_EVENTS_COMMAND} - show last `n` events for activity
 
 /{STATISTICS_COMMAND} - show statistics for the chosen time range
 """
 # /distracted - to write distracted time for your event.sql
-# /last_tracking - shows last 10 events
 
 # universal
 
@@ -76,22 +75,15 @@ DELETE_LAST_EVENT_2 = "Your last event: {}"
 DELETE_LAST_EVENT_3_1 = "Event deleted - {}"
 DELETE_LAST_EVENT_4_1 = "Deletion is canceled."
 
+# /last_events
 
-# /show_last
-
-SHOW_LAST_1 = "Please, write a number how many last events you want to see. Max number: `20`."
-SHOW_LAST_2 = "Your last `{}` tracked events:\n{}"
+LAST_EVENTS_1 = "Please, write a number how many last events you want to see. Max number: `20`."
+LAST_EVENTS_2 = "Your last `{}` tracked events:\n{}"
 
 # /statistics
 
 STATISTIC_1 = "Please write period \n Example: `1D`, `1W`, `1M` for last time range, or `01.01.2021 - 05.01.2021`"
 STATISTIC_2 = "That's how was your {}"
-
-# /clear
-
-CLEAR_1 = "Do you want to clear all your events for all your activities?"
-CLEAR_2_1 = "Done! Now your history is clear."
-CLEAR_2_2 = "Clearing is canceled. Continue using me :)"
 
 # ERRORS
 
