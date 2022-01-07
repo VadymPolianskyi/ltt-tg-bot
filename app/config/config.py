@@ -2,7 +2,9 @@ import configparser
 import os
 
 config = configparser.ConfigParser()
-config.read('app/config/conf.ini')
+env = os.environ.get("ENV")
+
+config.read(f'app/config/{env}.ini')
 
 BOT_API_KEY = os.getenv("BOT_API_KEY")
 
