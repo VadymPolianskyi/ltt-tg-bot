@@ -5,8 +5,8 @@ def empty_markup():
     return types.InlineKeyboardMarkup()
 
 
-def create_activity_voter_markup(event_name: str, activity: str):
-    return create_voter_inline_markup(event_name, ("activity", activity))
+def create_activity_voter_markup(event_name: str, data: str, title: str = "payload"):
+    return create_voter_inline_markup(event_name, (title, data))
 
 
 def create_voter_inline_markup(vote_prefix: str, *additional):
