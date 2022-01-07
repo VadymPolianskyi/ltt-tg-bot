@@ -14,3 +14,5 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD")
 
 DB_TABLE_ACTIVITY = config['TABLE']['Activity']
 DB_TABLE_EVENT = config['TABLE']['Event']
+
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
