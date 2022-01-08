@@ -8,6 +8,8 @@ from app.handler.activity.activities import ActivitiesHandler
 from app.handler.activity.add_activity import AddActivityHandler, AddActivityPostAnswerHandler
 from app.handler.activity.delete_activity import DeleteActivityHandler, DeleteActivityBeforeVoteCallbackHandler, \
     DeleteActivityAfterVoteCallbackHandler
+from app.handler.event.delete_event import DeleteEventHandler, DeleteEventBeforeEventsVoteCallbackHandler, \
+    DeleteEventBeforeVoteCallbackHandler, DeleteEventAfterVoteCallbackHandler
 from app.handler.event.last_event import LastEventsPostAnswerHandler, LastEventsHandler
 from app.handler.router import CallbackRouter
 from app.handler.start import StartHandler
@@ -33,12 +35,19 @@ track_after_vote_callback_handler = TrackAfterVoteCallbackHandler(bot, track_pos
 start_tracking_after_vote_callback_handler = StartTrackingAfterVoteCallbackHandler(bot, events)
 stop_tracking_after_vote_callback_handler = StopTrackingAfterVoteCallbackHandler(bot, events)
 
+delete_event_before_events_vote_callback_handler = DeleteEventBeforeEventsVoteCallbackHandler(bot, statistics_service)
+delete_event_before_vote_callback_handler = DeleteEventBeforeVoteCallbackHandler(bot)
+delete_event_after_vote_callback_handler = DeleteEventAfterVoteCallbackHandler(bot, events)
+
 callback_router = CallbackRouter(
     delete_activity_before_vote_callback_handler,
     delete_activity_after_vote_callback_handler,
     track_after_vote_callback_handler,
     start_tracking_after_vote_callback_handler,
-    stop_tracking_after_vote_callback_handler
+    stop_tracking_after_vote_callback_handler,
+    delete_event_before_events_vote_callback_handler,
+    delete_event_before_vote_callback_handler,
+    delete_event_after_vote_callback_handler
 )
 
 #### HANDLERS ####
@@ -115,6 +124,11 @@ def start_tracking(message):
 @bot.message_handler(commands=['last_events'])
 def last_events(message):
     last_events_handler.handle(message)
+
+
+@bot.message_handler(commands=['delete_event'])
+def last_events(message):
+    delete_event_handler.handle(message)
 
 
 #######################
