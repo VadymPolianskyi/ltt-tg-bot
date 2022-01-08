@@ -2,9 +2,7 @@ import configparser
 import os
 
 config = configparser.ConfigParser()
-env = os.environ.get("ENV")
-
-config.read(f'app/config/{env}.ini')
+config.read('app/config/conf.ini')
 
 BOT_API_KEY = os.getenv("BOT_API_KEY")
 
@@ -16,5 +14,3 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD")
 
 DB_TABLE_ACTIVITY = config['TABLE']['Activity']
 DB_TABLE_EVENT = config['TABLE']['Event']
-
-WEBHOOK_URL = os.environ.get("WEBHOOK_URL")

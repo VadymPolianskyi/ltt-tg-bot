@@ -42,7 +42,7 @@ def extract_days_weeks_months(days_weeks_months_str: str):
     if not m:
         print("ERROR")
 
-    days = int(m.group(2)) if m.group(1) else 0
+    days = m.group(2) if m.group(1) else 0
     weeks = m.group(4) if m.group(3) else 0
     months = m.group(6) if m.group(5) else 0
 
@@ -66,4 +66,4 @@ def minus(dt: datetime, months: int = 0, weeks: int = 0, days: int = 0, hours: i
     if months > 0:
         days += months * 30
 
-    return dt - timedelta(weeks=weeks, days=days - 1, hours=hours, minutes=minutes)
+    return dt - timedelta(weeks=weeks, days=days, hours=hours, minutes=minutes)
