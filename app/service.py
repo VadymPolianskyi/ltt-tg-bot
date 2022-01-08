@@ -1,9 +1,10 @@
-from datetime import datetime, date
+from datetime import datetime
 from typing import Optional
 
 import app.util.time as time_service
 from app.db import ActivityDao, Activity, EventDao, EventType, Event, StatisticsSelector
 from app.statistics import FullStatistics, ActivityStatistics
+from app.util import time
 
 
 class ActivityService:
@@ -20,7 +21,7 @@ class ActivityService:
     def delete(self, user_id: int, activity_name: str):
         print(f"Delete all  activity({activity_name}) events for user({str(user_id)})")
         a = self.dao.find_by_user_id_and_name(user_id, activity_name)
-        self.event_dao.delete(user_id, a.id)
+        self.event_dao.delete_all_for_activity(a.id)
         self.dao.delete(user_id, a.name)
 
     def show_all(self, user_id: int) -> list:
@@ -36,6 +37,10 @@ class ActivityService:
         started_activities = self.dao.find_last_started(user_id)
         print(f'Found {len(started_activities)} started activities for user({str(user_id)})')
         return [a.name for a in started_activities]
+
+    def migrate_on_user_id(self, username: str, user_id: int):
+        self.dao.migrate_on_user_id(username, user_id)
+        self.event_dao.migrate_on_user_id(username, user_id)
 
 
 class EventService:
@@ -56,6 +61,10 @@ class EventService:
     def find_last(self, user_id: int, activity_name: str, event_type: EventType) -> Optional[Event]:
         return self.dao.find_last_event_for_activity(user_id, activity_name, event_type)
 
+    def delete_pair(self, stop_event_id: str):
+        start_event_id = self.dao.find(stop_event_id).last
+        self.dao.delete(start_event_id, stop_event_id)
+
     def delete(self, *event_ids):
         self.dao.delete(*event_ids)
 
@@ -63,6 +72,7 @@ class EventService:
 class StatisticsService:
     def __init__(self):
         self.event_dao = EventDao()
+        self.activity_dao = ActivityDao()
 
     def generate(self, user_id: int, date_range_str) -> FullStatistics:
         print(f'Generate statistic for user({user_id}) for {date_range_str}')
@@ -85,7 +95,32 @@ class StatisticsService:
 
         return FullStatistics(activity_statistic=activity_statistic, from_d=from_d, until_d=until_d)
 
-    def last_events_statistics(self, user_id: int, limit: int = None, ) -> list:
+    def statistics_with_event_id(self, user_id: int, activity_name: str, after_event_id: str = None,
+                                 limit: int = 20) -> list:
+
+        if after_event_id:
+            after_event = self.event_dao.find(after_event_id)
+            to_date = after_event.time
+            activity_id = after_event.activity_id
+        else:
+            to_date = time.now()
+            activity_id = self.activity_dao.find_by_user_id_and_name(user_id, activity_name).id
+
+        events_statistics: list = StatisticsSelector(user_id) \
+            .activity_id(activity_id) \
+            .to_time(to_date) \
+            .limit(limit) \
+            .order_from_newest() \
+            .select()
+
+        statistics_with_id = list()
+        for es in events_statistics:
+            element = (es.stop_event_id, ActivityStatistics.from_statistic(es))
+            statistics_with_id.append(element)
+
+        return statistics_with_id
+
+    def last_events_statistics(self, user_id: int, limit: int = 20) -> list:
         print(f"Find last {limit} events for user({str(user_id)})")
 
         last_events_statistics = StatisticsSelector(user_id) \

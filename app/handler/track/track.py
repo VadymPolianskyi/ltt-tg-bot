@@ -3,7 +3,7 @@ from telebot.types import Message
 
 from app.config import msg
 from app.db import EventType
-from app.handler.general import TelegramMessageHandler, TelegramCallbackHandler
+from app.handler.general import TelegramMessageHandler, TelegramCallbackHandler, MessageMeta, CallbackMeta
 from app.service import ActivityService, EventService
 from app.util import markup, time
 
@@ -14,12 +14,14 @@ class TrackHandler(TelegramMessageHandler):
         super().__init__(bot)
         self.activities = activities
 
-    def handle_(self, message: Message, *args):
-        all_user_activity_titles = self.activities.show_all_titles(message.from_user.id)
-        activities_keyboard = markup.create_inline_markup(TrackAfterVoteCallbackHandler.MARKER,
-                                                          all_user_activity_titles)
+    def handle_(self, message: MessageMeta, *args):
+        all_user_activity_titles = self.activities.show_all_titles(message.user_id)
+        activities_keyboard = markup.create_simple_inline_markup(
+            TrackAfterVoteCallbackHandler.MARKER,
+            all_user_activity_titles
+        )
 
-        self.bot.send_message(message.chat.id, msg.TRACK_1, reply_markup=activities_keyboard)
+        self.bot.send_message(message.user_id, msg.TRACK_1, reply_markup=activities_keyboard)
 
 
 class TrackPostTimeAnswerHandler(TelegramMessageHandler):
@@ -28,30 +30,30 @@ class TrackPostTimeAnswerHandler(TelegramMessageHandler):
         super().__init__(bot)
         self.events = events
 
-    def handle_(self, message: Message, *args):
+    def handle_(self, message: MessageMeta, *args):
         assert args
         activity = args[0]
 
         hours_and_minutes_str: str = message.text
         hours, minutes = time.extract_hours_and_minutes(hours_and_minutes_str)
 
-        end_time = time.now()
+        end_time = message.time
         start_time = time.minus(end_time, hours=hours, minutes=minutes)
 
         e_start = self.events.create(
-            user_id=message.from_user.id,
+            user_id=message.user_id,
             activity_name=activity,
             event_type=EventType.START,
             time=start_time)
 
         self.events.create(
-            user_id=message.from_user.id,
+            user_id=message.user_id,
             activity_name=activity,
             event_type=EventType.STOP,
             time=end_time,
             last=e_start.id)
 
-        self.bot.send_message(message.chat.id, msg.FINISHED_TRACKING.format(activity, hours, minutes))
+        self.bot.send_message(message.user_id, msg.FINISHED_TRACKING.format(activity, hours, minutes))
 
 
 class TrackAfterVoteCallbackHandler(TelegramCallbackHandler):
@@ -62,11 +64,13 @@ class TrackAfterVoteCallbackHandler(TelegramCallbackHandler):
         super().__init__(bot)
         self.track_post_time_answer_handler = track_post_time_answer_handler
 
-    def handle_(self, chat_id: int, payload: dict):
-        activity_name = payload[self.MARKER]
+    def handle_(self, callback: CallbackMeta):
+        activity_name = callback.payload[self.MARKER]
 
-        self.bot.send_message(chat_id, msg.TRACK_2.format(activity_name))
+        self.bot.send_message(callback.user_id, msg.TRACK_2.format(activity_name))
 
-        self.bot.register_next_step_handler_by_chat_id(chat_id,
-                                                       self.track_post_time_answer_handler.handle,
-                                                       activity_name)
+        self.bot.register_next_step_handler_by_chat_id(
+            callback.user_id,
+            self.track_post_time_answer_handler.handle,
+            activity_name
+        )
