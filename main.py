@@ -36,7 +36,7 @@ start_tracking_after_vote_callback_handler = StartTrackingAfterVoteCallbackHandl
 stop_tracking_after_vote_callback_handler = StopTrackingAfterVoteCallbackHandler(bot, events)
 
 delete_event_before_events_vote_callback_handler = DeleteEventBeforeEventsVoteCallbackHandler(bot, statistics_service)
-delete_event_before_vote_callback_handler = DeleteEventBeforeVoteCallbackHandler(bot)
+delete_event_before_vote_callback_handler = DeleteEventBeforeVoteCallbackHandler(bot, statistics_service)
 delete_event_after_vote_callback_handler = DeleteEventAfterVoteCallbackHandler(bot, events)
 
 callback_router = CallbackRouter(
