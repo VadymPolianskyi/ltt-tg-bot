@@ -13,6 +13,9 @@ class ActivitiesHandler(TelegramMessageHandler):
         self.activities = activities
 
     def handle_(self, message: Message, *args):
+        # todo: remove migration
+        self.activities.migrate_on_user_id(message.from_user.username, message.from_user.id)
+
         all_activity_titles = self.activities.show_all_titles(message.from_user.id)
         str_list = "\n- " + "\n- ".join(all_activity_titles) if all_activity_titles else "\n Nothing yet..."
         self.bot.send_message(message.chat.id, msg.ALL_ACTIVITIES.format(str_list))
