@@ -1,8 +1,7 @@
 from telebot import TeleBot
-from telebot.types import Message
 
 from app.config import msg
-from app.handler.general import TelegramMessageHandler
+from app.handler.general import TelegramMessageHandler, MessageMeta
 
 
 class StartHandler(TelegramMessageHandler):
@@ -10,5 +9,5 @@ class StartHandler(TelegramMessageHandler):
         print('Creating StartHandler...')
         super().__init__(bot)
 
-    def handle_(self, message: Message, *args):
-        self.bot.send_message(message.chat.id, msg.START)
+    def handle_(self, message: MessageMeta, *args):
+        self.bot.send_message(message.user_id, msg.START)
