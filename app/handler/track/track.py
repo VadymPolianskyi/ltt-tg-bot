@@ -16,8 +16,8 @@ class TrackHandler(TelegramMessageHandler):
 
     def handle_(self, message: Message, *args):
         all_user_activity_titles = self.activities.show_all_titles(message.from_user.id)
-        activities_keyboard = markup.create_inline_markup(TrackAfterVoteCallbackHandler.MARKER,
-                                                          all_user_activity_titles)
+        activities_keyboard = markup.create_simple_inline_markup(TrackAfterVoteCallbackHandler.MARKER,
+                                                                 all_user_activity_titles)
 
         self.bot.send_message(message.chat.id, msg.TRACK_1, reply_markup=activities_keyboard)
 
