@@ -157,11 +157,12 @@ class EventDao(Dao):
                 SELECT * FROM `{self._event_table_name}` as e
                 JOIN `{self._activity_table_name}` as a ON e.activity_id=a.id
                 WHERE a.name=%s AND e.user_id=%s AND e.type=%s
+                AND e.id NOT IN (SELECT `last` FROM `{self._event_table_name}` WHERE `user_id`=%s)
                 ORDER BY e.time DESC
                 LIMIT 1
             """.replace("'", "")
 
-            cursor.execute(sql_query, (activity_name, user_id, event_type.name))
+            cursor.execute(sql_query, (activity_name, user_id, event_type.name, user_id))
             r = cursor.fetchone()
             return Event(id=r['id'], activity_id=r['activity_id'], event_type=r['type'], time=r['time'],
                          user_id=r['user_id'], last=r['last']) if r else None
