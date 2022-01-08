@@ -35,7 +35,7 @@ class TelegramMessageHandler:
             time = datetime.fromtimestamp(message.date)
             text = message.text
 
-            args += tuple(message.from_user.username)  # temp
+            args = args + (message.from_user.username,)  # temp
 
             self.handle_(MessageMeta(chat_id, time, text), *args)
         except Exception as e:
