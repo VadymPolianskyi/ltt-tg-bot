@@ -92,3 +92,8 @@ STATISTIC_2 = '📊 Full Report for ({} - {}) \n\n{}'
 # ERRORS
 
 ERROR_BASIC = "🙈 Sorry, something went wrong. Please try again..."
+
+# VOTE
+
+YES = '✅ Yes'
+NO = '❌ No'

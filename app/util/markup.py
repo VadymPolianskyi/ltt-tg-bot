@@ -1,11 +1,13 @@
 from telebot import types
 
+from app.config import msg
+
 VOTE_MARK = '_v'
 EMPTY_VOTE_RESULT = '_'
 
 
 def create_voter_inline_markup(vote_prefix: str, value: str):
-    return create_inline_markup(vote_prefix + VOTE_MARK, [('✅ Yes', value), ('❌ No', EMPTY_VOTE_RESULT)])
+    return create_inline_markup(vote_prefix + VOTE_MARK, [(msg.YES, value), (msg.NO, EMPTY_VOTE_RESULT)])
 
 
 def create_simple_inline_markup(key, button_names: list):
