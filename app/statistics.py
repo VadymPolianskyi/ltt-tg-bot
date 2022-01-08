@@ -1,7 +1,8 @@
-from datetime import datetime, timedelta, date
-from app.db import EventStatistic
+from datetime import datetime, date
 
-from app.util.time import timedelta_to_minutes
+from app.config import msg
+from app.db import EventStatistic, Event
+from app.util.time import timedelta_to_minutes, count_difference
 
 
 class ActivityStatistics:
@@ -20,9 +21,11 @@ class ActivityStatistics:
         self.spent_minutes += a_s.spent_minutes
         self.counter += 1
 
-    def to_str(self, with_date=False):
-        date_str = f'({self.from_date} - {self.until_date})' if with_date else ''
-        return f'{self.activity_name} - {self.format_spent_minutes()} / {self.counter} time(s) {date_str}'
+    def to_str(self, with_single_date=False, with_date_range=False, with_counter=True):
+        single_date_str = f'({self.from_date})' if with_single_date else ''
+        date_range_str = f'({self.from_date} - {self.until_date})' if with_date_range else ''
+        counter_str = f'/ {self.counter} time(s)' if with_counter else ''
+        return f'{self.activity_name} - {self.format_spent_minutes()} {counter_str} {date_range_str} {single_date_str}'
 
     def format_spent_minutes(self) -> str:
         spent_hours = int(self.spent_minutes / 60)
@@ -37,6 +40,16 @@ class ActivityStatistics:
             until_date=statistic.date,
             spent_minutes=timedelta_to_minutes(statistic.spent),
             activity=statistic.activity_name
+        )
+
+    @classmethod
+    def from_events(cls, start_event: Event, stop_event: Event, activity_name: str):
+        hours, minutes = count_difference(start_event.time, stop_event.time)
+        return ActivityStatistics(
+            from_date=start_event.time.date(),
+            until_date=stop_event.time.date(),
+            spent_minutes=minutes + (hours * 60),
+            activity=activity_name
         )
 
 
@@ -69,7 +82,7 @@ class FullStatistics:
 
     def to_str(self):
         printed_activities_statistic: str = '\n'.join([f.to_str() for f in self.fully()])
-        return f'Full Report for ({self.__from_d} - {self.__until_d})\n\n{printed_activities_statistic}'
+        return msg.STATISTIC_2.format(self.__from_d, self.__until_d, printed_activities_statistic)
 
     def fully(self) -> list:
         grouped_by_activity = dict()
