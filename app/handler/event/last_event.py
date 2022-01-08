@@ -19,7 +19,8 @@ class LastEventsPostAnswerHandler(TelegramMessageHandler):
 
         last_events_statistics: list = self.statistics_service.last_events_statistics(message.user_id, num_limit)
         printed_last_events_statistics: str = '\n'.join(
-            [s.to_str(with_single_date=True, with_counter=False) for s in last_events_statistics])
+            [s.to_str(with_single_date=True, with_counter=False, prefix=msg.LAST_EVENTS_LIST_PREFIX) for s in
+             last_events_statistics])
 
         self.bot.send_message(message.user_id, msg.LAST_EVENTS_2.format(num_limit, printed_last_events_statistics))
 
