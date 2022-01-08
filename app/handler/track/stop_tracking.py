@@ -42,8 +42,8 @@ class StopTrackingHandler(TelegramMessageHandler):
                 chat_id=message.chat.id, payload={StopTrackingAfterVoteCallbackHandler.MARKER: started_activities[0]})
 
         elif len(started_activities) > 1:
-            activities_keyboard = markup.create_inline_markup(StopTrackingAfterVoteCallbackHandler.MARKER,
-                                                              started_activities)
+            activities_keyboard = markup.create_simple_inline_markup(StopTrackingAfterVoteCallbackHandler.MARKER,
+                                                                     started_activities)
             self.bot.send_message(message.chat.id, msg.STOP_TRACKING_2_1, reply_markup=activities_keyboard)
 
         else:

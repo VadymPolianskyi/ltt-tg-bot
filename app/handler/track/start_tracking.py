@@ -19,8 +19,8 @@ class StartTrackingHandler(TelegramMessageHandler):
         all_user_activity_titles = [a for a in self.activities.show_all_titles(message.from_user.id) if
                                     a not in started_titles]
 
-        activities_keyboard = markup.create_inline_markup(StartTrackingAfterVoteCallbackHandler.MARKER,
-                                                          all_user_activity_titles)
+        activities_keyboard = markup.create_simple_inline_markup(StartTrackingAfterVoteCallbackHandler.MARKER,
+                                                                 all_user_activity_titles)
 
         self.bot.send_message(message.chat.id, msg.START_TRACKING_1, reply_markup=activities_keyboard)
 

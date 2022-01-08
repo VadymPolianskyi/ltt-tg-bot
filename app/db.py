@@ -140,7 +140,7 @@ class EventDao(Dao):
             cursor.execute(sql_query, event_id)
             r = cursor.fetchone()
             return Event(id=r['id'], activity_id=r['activity_id'], event_type=r['type'], time=r['time'],
-                         user_id=r['user_id'])
+                         user_id=r['user_id'], last=r['last'])
 
     def find_last_event_for_activity(self, user_id: int, activity_name: str, event_type: EventType) -> Optional[Event]:
         with connection.cursor() as cursor:
@@ -157,34 +157,40 @@ class EventDao(Dao):
             return Event(id=r['id'], activity_id=r['activity_id'], event_type=r['type'], time=r['time'],
                          user_id=r['user_id'], last=r['last']) if r else None
 
-    def delete(self, user_id: int, activity_id: str = None, *event_ids):
+    def delete_all_for_activity(self, activity_id: str):
         with connection.cursor() as cursor:
-            activity_condition: str = " AND activity_id=%s" if activity_id else ''
-            event_ids_conndition = " AND " + " or ".join(["id=%s" for _ in event_ids]) if event_ids else ''
+            sql_query = f"""
+            DELETE FROM {self._event_table_name} WHERE activity_id=%s
+            """.replace("'", "")
+            cursor.execute(sql_query, activity_id)
 
-            all_query_parameters = [user_id, activity_id] + list(event_ids)
-            query_parameters = tuple([p for p in all_query_parameters if p is not None])
+    def delete(self, *event_ids):
+        with connection.cursor() as cursor:
+            event_ids_conndition = " or ".join(["id=%s" for _ in event_ids]) if event_ids else ''
 
             sql_query = f"""
-            DELETE FROM {self._event_table_name} WHERE user_id=%s {activity_condition} {event_ids_conndition}
+            DELETE FROM {self._event_table_name} WHERE {event_ids_conndition}
             """.replace("'", "")
-            cursor.execute(sql_query, query_parameters)
+            cursor.execute(sql_query, event_ids)
 
 
 class StatisticsSelector(Dao):
     def __init__(self, user_id: int):
         super().__init__()
         self.__query_parameters = tuple()
+        self.__dynamic_conditions = str()
         self.__user_id = user_id
         self.__activity_id = None
         self.__from_d = None
         self.__to_d = None
+        self.__to_t = None
 
         self.__order: str = ''
         self.__limit: str = ''
         self.__activity_conndition: str = ''
         self.__from_date_conndition: str = ''
         self.__to_date_conndition: str = ''
+        self.__to_time_conndition: str = ''
 
     def activity_id(self, activity_id: str):
         self.__activity_conndition = 'AND stop_ev.activity_id=%s'
@@ -201,6 +207,11 @@ class StatisticsSelector(Dao):
         self.__to_d = to_d
         return self
 
+    def to_time(self, to_t: datetime):
+        self.__to_time_conndition = 'AND stop_ev.time <= %s'
+        self.__to_t = to_t.strftime('%Y-%m-%d %H:%M:%S')
+        return self
+
     def limit(self, limit: int):
         self.__limit: str = f'LIMIT {limit}'
         return self
@@ -208,6 +219,18 @@ class StatisticsSelector(Dao):
     def order_from_newest(self):
         self.__order = 'ORDER BY stop_ev.time DESC'
         return self
+
+    def __prepare_conditions(self):
+        all_conditions = [
+            self.__from_date_conndition,
+            self.__to_date_conndition,
+            self.__activity_conndition,
+            self.__to_time_conndition
+        ]
+
+        filtered = [c for c in all_conditions if c != '']
+
+        self.__dynamic_conditions = ' '.join(filtered)
 
     def __prepare_query_params(self):
         all_query_parameters = [
@@ -217,13 +240,15 @@ class StatisticsSelector(Dao):
             self.__user_id,
             self.__from_d,
             self.__to_d,
-            self.__activity_id
+            self.__activity_id,
+            self.__to_t
         ]
         filtered_qp = [p for p in all_query_parameters if p is not None]
 
         self.__query_parameters = tuple(filtered_qp)
 
     def select(self) -> list:
+        self.__prepare_conditions()
         self.__prepare_query_params()
         with connection.cursor() as cursor:
             sql_query = f"""
@@ -235,7 +260,7 @@ class StatisticsSelector(Dao):
             FROM {self._event_table_name} as stop_ev 
             JOIN start_ev on stop_ev.last=start_ev.id 
             JOIN {self._activity_table_name} as a on stop_ev.activity_id=a.id 
-            WHERE stop_ev.type=%s  AND stop_ev.user_id=%s {self.__from_date_conndition} {self.__to_date_conndition} {self.__activity_conndition}
+            WHERE stop_ev.type=%s  AND stop_ev.user_id=%s {self.__dynamic_conditions}
             {self.__order} {self.__limit}
             """.replace("'", "").strip()
             cursor.execute(sql_query, self.__query_parameters)
