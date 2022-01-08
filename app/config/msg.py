@@ -48,7 +48,7 @@ ADD_ACTIVITY_2 = "Created new activity with name `{}`. Write /" + ACTIVITIES_COM
 DELETE_ACTIVITY_1 = CHOOSE_ACTIVITY
 DELETE_ACTIVITY_2 = """Are you sure that you want to delete the activity `{}`?"""
 DELETE_ACTIVITY_3_1 = "Deleted activity with name `{}`. Write /" + ACTIVITIES_COMMAND + " to see all your activities."
-DELETE_ACTIVITY_4_1 = "Deletion for activity `{}` is canceled. Write /" + ACTIVITIES_COMMAND + " to see all your activities."
+DELETE_ACTIVITY_4_1 = "Deletion is canceled. Write /" + ACTIVITIES_COMMAND + " to see all your activities."
 
 # /track
 
@@ -56,29 +56,30 @@ TRACK_1 = CHOOSE_ACTIVITY
 TRACK_2 = """Got you. `{}`. How long?"""
 FINISHED_TRACKING = """Tracked `{}`. Totally spent {} hours {} minutes."""
 
-# /start
+# /start_tracking
 
 START_TRACKING_1 = CHOOSE_ACTIVITY
 START_TRACKING_2 = "Started! Please, don't forget to send /" + STOP_COMMAND + " after you finish `{}`. Have fun!"
 
-# /stop
+# /stop_tracking
 
 STOP_TRACKING_1 = FINISHED_TRACKING
 STOP_TRACKING_2_1 = CHOOSE_ACTIVITY
 STOP_TRACKING_2_2 = FINISHED_TRACKING
 STOP_TRACKING_3_1 = f""" Oh, I can't stop NOTHING. Please start activity by /{START_COMMAND}, or track already finished activity with /{TRACK_COMMAND} command."""
 
-# /delete_last
-
-DELETE_LAST_EVENT_1 = CHOOSE_ACTIVITY
-DELETE_LAST_EVENT_2 = "Your last event: {}"
-DELETE_LAST_EVENT_3_1 = "Event deleted - {}"
-DELETE_LAST_EVENT_4_1 = "Deletion is canceled."
-
 # /last_events
 
 LAST_EVENTS_1 = "Please, write a number how many last events you want to see. Max number: `20`."
 LAST_EVENTS_2 = "Your last `{}` tracked events:\n{}"
+
+# /delete_event
+
+DELETE_EVENT_1 = CHOOSE_ACTIVITY
+DELETE_EVENT_2 = "Please, choose one `{}` event that you want to delete:"
+DELETE_EVENT_3 = "Are you sure that you want to delete this event?"
+DELETE_EVENT_4_1 = "Event deleted"
+DELETE_EVENT_5_1 = "Deletion is canceled."
 
 # /statistics
 
