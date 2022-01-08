@@ -63,6 +63,7 @@ last_events_post_answer_handler = LastEventsPostAnswerHandler(bot, activities, s
 last_events_handler = LastEventsHandler(bot, activities, last_events_post_answer_handler)
 statistics_post_answer_handler = StatisticsPostAnswerHandler(bot, statistics_service)
 statistics_handler = StatisticsHandler(bot, statistics_post_answer_handler)
+delete_event_handler = DeleteEventHandler(bot, activities)
 
 
 @bot.message_handler(commands=['start', 'help'])
