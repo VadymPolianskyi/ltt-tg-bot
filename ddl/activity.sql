@@ -1,6 +1,8 @@
-CREATE TABLE `ltt_activity` (
-  `id` VARCHAR(45) NOT NULL,
-  `username` VARCHAR(64) NOT NULL,
-  `name` VARCHAR(64) NOT NULL,
-  `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`));
+CREATE TABLE "ltt_activity" (
+  "id" varchar(45) NOT NULL,
+  "username" varchar(64) DEFAULT NULL,
+  "name" varchar(64) NOT NULL,
+  "created" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "user_id" int DEFAULT NULL,
+  PRIMARY KEY ("id")
+)
