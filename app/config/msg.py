@@ -42,7 +42,7 @@ ALL_ACTIVITIES = "📋 All your activities: {} \n\n/" + ADD_ACTIVITY_COMMAND + "
 
 # /add_activity
 
-ADD_ACTIVITY_1 = """✍️ Write the name for a new activity """
+ADD_ACTIVITY_1 = """✍️ Write the name for a new activity: """
 ADD_ACTIVITY_2 = "Created new activity with the name `{}`. \n\n/" + ACTIVITIES_COMMAND + " - 👁 see all your activities"
 
 # /delete_activity
@@ -74,6 +74,8 @@ STOP_TRACKING_3_1 = f""" Oh, I can't stop nothing 🤷‍. Please start 🆕 act
 
 LAST_EVENTS_1 = "✍️ Write a number of how many last events you want to see. 🔝 Max number: `20`."
 LAST_EVENTS_2 = "🔎 Your last `{}` events:\n{}"
+
+LAST_EVENTS_LIST_PREFIX = "➡️ "
 
 # /delete_event
 
