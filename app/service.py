@@ -93,13 +93,17 @@ class StatisticsService:
     def statistics_with_event_id(self, user_id: int, activity_name: str, after_event_id: str = None,
                                  limit: int = 20) -> list:
 
-        activity_id = self.activity_dao.find_by_user_id_and_name(user_id, activity_name).id
-
-        to_date = self.event_dao.find(after_event_id).time.date if after_event_id else datetime.now().date()
+        if after_event_id:
+            after_event = self.event_dao.find(after_event_id)
+            to_date = after_event.time
+            activity_id = after_event.activity_id
+        else:
+            to_date = datetime.now()
+            activity_id = self.activity_dao.find_by_user_id_and_name(user_id, activity_name).id
 
         events_statistics: list = StatisticsSelector(user_id) \
             .activity_id(activity_id) \
-            .to_date(to_date) \
+            .to_time(to_date) \
             .limit(limit) \
             .order_from_newest() \
             .select()
