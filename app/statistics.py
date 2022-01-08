@@ -20,10 +20,11 @@ class ActivityStatistics:
         self.spent_minutes += a_s.spent_minutes
         self.counter += 1
 
-    def to_str(self, with_date=False, with_counter=True):
-        date_str = f'({self.from_date} - {self.until_date})' if with_date else ''
+    def to_str(self, with_single_date=False, with_date_range=False, with_counter=True):
+        single_date_str = f'({self.from_date})' if with_single_date else ''
+        date_range_str = f'({self.from_date} - {self.until_date})' if with_date_range else ''
         counter_str = f'/ {self.counter} time(s)' if with_counter else ''
-        return f'{self.activity_name} - {self.format_spent_minutes()} {counter_str} {date_str}'
+        return f'{self.activity_name} - {self.format_spent_minutes()} {counter_str} {date_range_str} {single_date_str}'
 
     def format_spent_minutes(self) -> str:
         spent_hours = int(self.spent_minutes / 60)
