@@ -42,7 +42,7 @@ def extract_days_weeks_months(days_weeks_months_str: str):
     if not m:
         print("ERROR")
 
-    days = m.group(2) if m.group(1) else 0
+    days = int(m.group(2)) - 1 if m.group(1) else 0
     weeks = m.group(4) if m.group(3) else 0
     months = m.group(6) if m.group(5) else 0
 
