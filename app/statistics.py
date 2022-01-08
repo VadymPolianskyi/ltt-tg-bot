@@ -1,5 +1,6 @@
 from datetime import datetime, date
 
+from app.config import msg
 from app.db import EventStatistic, Event
 from app.util.time import timedelta_to_minutes, count_difference
 
@@ -81,7 +82,7 @@ class FullStatistics:
 
     def to_str(self):
         printed_activities_statistic: str = '\n'.join([f.to_str() for f in self.fully()])
-        return f'Full Report for ({self.__from_d} - {self.__until_d})\n\n{printed_activities_statistic}'
+        return msg.STATISTIC_2.format(self.__from_d, self.__until_d, printed_activities_statistic)
 
     def fully(self) -> list:
         grouped_by_activity = dict()

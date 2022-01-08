@@ -44,20 +44,23 @@ class DeleteEventBeforeEventsVoteCallbackHandler(TelegramCallbackHandler):
             after_event_id=self.after_event_id
         )
 
-        button_name_value_tuples = list()
-        for s_i in statistics_with_id:
-            element = (f'{s_i[1].from_date} - {s_i[1].format_spent_minutes()}', s_i[0])
-            button_name_value_tuples.append(element)
+        if len(statistics_with_id) == 0 and activity_name:
+            self.bot.send_message(chat_id=callback.user_id, text=msg.DELETE_EVENT_2_2.format(activity_name), )
+        else:
+            button_name_value_tuples = list()
+            for s_i in statistics_with_id:
+                element = (f'{s_i[1].from_date} - {s_i[1].format_spent_minutes()}', s_i[0])
+                button_name_value_tuples.append(element)
 
-        need_next = len(statistics_with_id) >= 9
-        if need_next:
-            last_button = ('Next', NEXT + statistics_with_id[-1][0])
-            button_name_value_tuples.append(last_button)
+            need_next = len(statistics_with_id) >= 9
+            if need_next:
+                last_button = ('Next', NEXT + statistics_with_id[-1][0])
+                button_name_value_tuples.append(last_button)
 
-        vote_keyboard = markup.create_inline_markup(DeleteEventBeforeVoteCallbackHandler.MARKER,
-                                                    button_name_value_tuples)
-        self.bot.send_message(chat_id=callback.user_id, text=msg.DELETE_EVENT_2.format(activity_name),
-                              reply_markup=vote_keyboard)
+            vote_keyboard = markup.create_inline_markup(DeleteEventBeforeVoteCallbackHandler.MARKER,
+                                                        button_name_value_tuples)
+            self.bot.send_message(chat_id=callback.user_id, text=msg.DELETE_EVENT_2_1.format(activity_name),
+                                  reply_markup=vote_keyboard)
 
 
 class DeleteEventBeforeVoteCallbackHandler(TelegramCallbackHandler):
