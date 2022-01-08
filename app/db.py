@@ -140,7 +140,7 @@ class EventDao(Dao):
             cursor.execute(sql_query, event_id)
             r = cursor.fetchone()
             return Event(id=r['id'], activity_id=r['activity_id'], event_type=r['type'], time=r['time'],
-                         user_id=r['user_id'])
+                         user_id=r['user_id'], last=r['last'])
 
     def find_last_event_for_activity(self, user_id: int, activity_name: str, event_type: EventType) -> Optional[Event]:
         with connection.cursor() as cursor:
@@ -157,18 +157,21 @@ class EventDao(Dao):
             return Event(id=r['id'], activity_id=r['activity_id'], event_type=r['type'], time=r['time'],
                          user_id=r['user_id'], last=r['last']) if r else None
 
-    def delete(self, user_id: int, activity_id: str = None, *event_ids):
+    def delete_all_for_activity(self, activity_id: str):
         with connection.cursor() as cursor:
-            activity_condition: str = " AND activity_id=%s" if activity_id else ''
-            event_ids_conndition = " AND " + " or ".join(["id=%s" for _ in event_ids]) if event_ids else ''
+            sql_query = f"""
+            DELETE FROM {self._event_table_name} WHERE activity_id=%s
+            """.replace("'", "")
+            cursor.execute(sql_query, activity_id)
 
-            all_query_parameters = [user_id, activity_id] + list(event_ids)
-            query_parameters = tuple([p for p in all_query_parameters if p is not None])
+    def delete(self, *event_ids):
+        with connection.cursor() as cursor:
+            event_ids_conndition = " or ".join(["id=%s" for _ in event_ids]) if event_ids else ''
 
             sql_query = f"""
-            DELETE FROM {self._event_table_name} WHERE user_id=%s {activity_condition} {event_ids_conndition}
+            DELETE FROM {self._event_table_name} WHERE {event_ids_conndition}
             """.replace("'", "")
-            cursor.execute(sql_query, query_parameters)
+            cursor.execute(sql_query, event_ids)
 
 
 class StatisticsSelector(Dao):
