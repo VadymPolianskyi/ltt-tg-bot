@@ -4,6 +4,7 @@ from typing import Optional
 import app.util.time as time_service
 from app.db import ActivityDao, Activity, EventDao, EventType, Event, StatisticsSelector
 from app.statistics import FullStatistics, ActivityStatistics
+from app.util import time
 
 
 class ActivityService:
@@ -36,6 +37,10 @@ class ActivityService:
         started_activities = self.dao.find_last_started(user_id)
         print(f'Found {len(started_activities)} started activities for user({str(user_id)})')
         return [a.name for a in started_activities]
+
+    def migrate_on_user_id(self, username: str, user_id: int):
+        self.dao.migrate_on_user_id(username, user_id)
+        self.event_dao.migrate_on_user_id(username, user_id)
 
 
 class EventService:
@@ -98,7 +103,7 @@ class StatisticsService:
             to_date = after_event.time
             activity_id = after_event.activity_id
         else:
-            to_date = datetime.now()
+            to_date = time.now()
             activity_id = self.activity_dao.find_by_user_id_and_name(user_id, activity_name).id
 
         events_statistics: list = StatisticsSelector(user_id) \

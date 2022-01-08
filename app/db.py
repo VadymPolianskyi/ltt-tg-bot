@@ -116,6 +116,15 @@ class ActivityDao(Dao):
             return [Activity(name=r['name'], user_id=user_id, created=r['created'], id=r['id']) for r in
                     cursor.fetchall()]
 
+    def migrate_on_user_id(self, username: str, user_id: int):
+        with connection.cursor() as cursor:
+            sql_query = f"""
+            UPDATE `{self._activity_table_name}`
+            SET user_id = %s
+            WHERE username=%s;
+            """.replace("'", "")
+            cursor.execute(sql_query, (user_id, username))
+
 
 class EventDao(Dao):
     def __init__(self):
@@ -172,6 +181,15 @@ class EventDao(Dao):
             DELETE FROM {self._event_table_name} WHERE {event_ids_conndition}
             """.replace("'", "")
             cursor.execute(sql_query, event_ids)
+
+    def migrate_on_user_id(self, username: str, user_id: int):
+        with connection.cursor() as cursor:
+            sql_query = f"""
+            UPDATE `{self._event_table_name}`
+            SET user_id = %s
+            WHERE username=%s;
+            """.replace("'", "")
+            cursor.execute(sql_query, (user_id, username))
 
 
 class StatisticsSelector(Dao):
