@@ -29,11 +29,12 @@ class TelegramMessageHandler:
 
     def handle(self, message: Message, *args):
         try:
-            print(f"Message '{message.text}' in chat({message.chat.id}). Args: {','.join(args)}")
 
             chat_id = message.chat.id
             time = datetime.fromtimestamp(message.date)
             text = message.text
+
+            print(f"Message '{text}' in chat({chat_id}) at '{time}'. Args: {','.join(args)}")
 
             args = args + (message.from_user.username,)  # temp
 
@@ -57,7 +58,7 @@ class TelegramCallbackHandler:
         time = datetime.fromtimestamp(call.message.date)
 
         payload: dict = json.loads(call.data)
-        print(f"Callback with payload '{payload}' in chat({chat_id})")
+        print(f"Callback with payload '{payload}' in chat({chat_id}) at '{time}'")
 
         try:
             self.bot.delete_message(chat_id=chat_id, message_id=message_id)
