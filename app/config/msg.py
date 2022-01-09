@@ -89,7 +89,7 @@ DELETE_EVENT_5_1 = "❌ Deletion is canceled."
 # /statistics
 
 STATISTIC_1 = "📆 Please write period \nExamples: `1D`, `1W`, `1M` for last time range, or `01.01.2021 - 05.01.2021`"
-STATISTIC_2 = '📊 Full Report for ({} - {}) \n\n{}'
+STATISTIC_2 = '📊 Full Report for ({}) \n\n{}'
 
 # ERRORS
 
