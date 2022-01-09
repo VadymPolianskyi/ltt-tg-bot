@@ -82,7 +82,8 @@ class FullStatistics:
 
     def to_str(self):
         printed_activities_statistic: str = '\n'.join([f.to_str() for f in self.fully()])
-        return msg.STATISTIC_2.format(self.__from_d, self.__until_d, printed_activities_statistic)
+        date_str = self.__from_d if self.__from_d == self.__until_d else f'{self.__from_d} - {self.__until_d}'
+        return msg.STATISTIC_2.format(date_str, printed_activities_statistic)
 
     def fully(self) -> list:
         grouped_by_activity = dict()
