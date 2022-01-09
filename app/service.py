@@ -74,15 +74,17 @@ class StatisticsService:
         self.event_dao = EventDao()
         self.activity_dao = ActivityDao()
 
-    def generate(self, user_id: int, date_range_str) -> FullStatistics:
-        print(f'Generate statistic for user({user_id}) for {date_range_str}')
-        extracted_date_range = time_service.extract_date_range(date_range_str)
+    def generate(self, user_id: int, date_range: str) -> FullStatistics:
+        print(f'Generate statistic for user({user_id}) for {date_range}')
+        extracted_date_range = time_service.extract_date_range(date_range)
         if extracted_date_range:
             from_d, until_d = extracted_date_range
         else:
-            days, weeks, months = time_service.extract_days_weeks_months(date_range_str)
-            until_datetime = datetime.now()
-            from_d = time_service.minus(until_datetime, months=months, weeks=weeks, days=days).date()
+            days, weeks, months = time_service.extract_days_weeks_months(date_range)
+            until_datetime = datetime.now()  # todo: select user timezone and calculate now for him
+            from_d = time_service.minus(until_datetime, months=months, weeks=weeks, days=days)
+            from_d = time_service.plus(from_d, days=1)
+            from_d = from_d.date()
             until_d = until_datetime.date()
 
         assert from_d <= until_d

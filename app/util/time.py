@@ -66,4 +66,11 @@ def minus(dt: datetime, months: int = 0, weeks: int = 0, days: int = 0, hours: i
     if months > 0:
         days += months * 30
 
-    return dt - timedelta(weeks=weeks, days=days - 1, hours=hours, minutes=minutes)
+    return dt - timedelta(weeks=weeks, days=days, hours=hours, minutes=minutes)
+
+
+def plus(dt: datetime, months: int = 0, weeks: int = 0, days: int = 0, hours: int = 0, minutes: int = 0) -> datetime:
+    if months > 0:
+        days += months * 30
+
+    return dt + timedelta(weeks=weeks, days=days, hours=hours, minutes=minutes)
