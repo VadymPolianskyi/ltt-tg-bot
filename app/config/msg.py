@@ -95,7 +95,7 @@ DELETE_EVENT_5_1 = "❌ Deletion is canceled."
 TIMEZONE_BUTTON = "🌎 Change Time Zone"
 
 TIMEZONE_1 = "🕐 Your current Time Zone is `{}`. ⌚️ Your current time is `{}`"
-TIMEZONE_2 = "🌏 Please write your Time Zone in the format `Continent/City`. \nP.S. 🙋 this [site](http://www.timezoneconverter.com/cgi-bin/findzone.tzc) can help you to find your time zone."
+TIMEZONE_2 = "🌏 Please write your Time Zone in the format `Continent/City`. (MAKE SURE that you've finished all your events before changing Time Zone) \nP.S. 🙋 this [site](http://www.timezoneconverter.com/cgi-bin/findzone.tzc) can help you to find your time zone."
 TIMEZONE_3 = "✅ Your Time Zone is changed on `{}`. ⌚️ Your current time is `{}`"
 
 
