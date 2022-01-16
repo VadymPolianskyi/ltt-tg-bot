@@ -16,6 +16,14 @@ connection = pymysql.connect(
     cursorclass=pymysql.cursors.DictCursor)
 
 
+class User:
+    def __init__(self, id: int, username: str, timezone: str = None, created: datetime = None):
+        self.id = id
+        self.username = username
+        self.timezone = timezone
+        self.created = created
+
+
 class Activity:
     def __init__(self, name: str, user_id: int, created: datetime = None, id: str = None, ):
         self.name = name
@@ -52,6 +60,11 @@ class Dao:
     def __init__(self):
         self._activity_table_name = config.DB_TABLE_ACTIVITY
         self._event_table_name = config.DB_TABLE_EVENT
+
+
+class UserDao(Dao):
+    def __init__(self):
+        super().__init__()
 
 
 class ActivityDao(Dao):
