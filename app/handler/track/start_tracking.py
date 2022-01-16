@@ -1,10 +1,11 @@
 from telebot import TeleBot
 
 from app.config import msg
-from app.db import EventType
+from app.db.entity import EventType
 from app.handler.general import TelegramMessageHandler, TelegramCallbackHandler, MessageMeta, CallbackMeta
-from app.service import ActivityService, EventService
-from app.util import markup
+from app.service import markup
+from app.service.activity import ActivityService
+from app.service.event import EventService
 
 
 class StartTrackingHandler(TelegramMessageHandler):

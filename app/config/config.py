@@ -1,20 +1,15 @@
-import configparser
 import os
-
-config = configparser.ConfigParser()
-env = os.environ.get("ENV")
-
-config.read(f'app/config/{env}.ini')
 
 BOT_API_KEY = os.getenv("BOT_API_KEY")
 
-DB_HOST = config['DB']['Host']
-DB_PORT = int(config['DB']['Port'])
-DB_NAME = config['DB']['Database']
-DB_USERNAME = os.environ.get("DB_USERNAME")
-DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = int(os.getenv("DB_PORT"))
+DB_NAME = os.getenv("DB_NAME")
+DB_USERNAME = os.getenv("DB_USERNAME")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
 
-DB_TABLE_ACTIVITY = config['TABLE']['Activity']
-DB_TABLE_EVENT = config['TABLE']['Event']
+DB_TABLE_ACTIVITY = os.getenv("DB_TABLE_ACTIVITY")
+DB_TABLE_EVENT = os.getenv("DB_TABLE_EVENT")
+DB_TABLE_USER = os.getenv("DB_TABLE_USER")
 
-WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")

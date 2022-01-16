@@ -1,10 +1,11 @@
 import re
 from datetime import datetime, timedelta
 from typing import Optional
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
-def now():
-    return datetime.now()
+def now(tz: str = None) -> datetime:
+    return datetime.now(tz=ZoneInfo(tz)) if tz else datetime.now()
 
 
 def timedelta_to_minutes(spent: timedelta) -> int:
@@ -14,6 +15,7 @@ def timedelta_to_minutes(spent: timedelta) -> int:
 
 
 def count_difference(start_time: datetime, stop_time: datetime):
+    assert start_time.tzinfo == stop_time.tzinfo
     diff_min = (stop_time - start_time).seconds / 60
     hours = int(diff_min / 60)
     minutes = int(diff_min - (hours * 60))
@@ -74,3 +76,15 @@ def plus(dt: datetime, months: int = 0, weeks: int = 0, days: int = 0, hours: in
         days += months * 30
 
     return dt + timedelta(weeks=weeks, days=days, hours=hours, minutes=minutes)
+
+
+def is_valid_time_zone(time_zone: str) -> bool:
+    try:
+        now(tz=time_zone)
+        return True
+    except ZoneInfoNotFoundError as e:
+        return False
+
+
+def from_timestamp(t: int, tz: str):
+    return datetime.fromtimestamp(t, ZoneInfo(tz))

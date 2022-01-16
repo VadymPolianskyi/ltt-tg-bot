@@ -2,9 +2,11 @@ from telebot import TeleBot
 
 from app.config import msg
 from app.handler.general import TelegramMessageHandler, TelegramCallbackHandler, MessageMeta, CallbackMeta
-from app.service import ActivityService, EventService, StatisticsService
-from app.util import markup
-from app.util.markup import EMPTY_VOTE_RESULT
+from app.service.activity import ActivityService
+from app.service.event import EventService
+from app.service.statistics import StatisticsService
+from app.service import markup
+from app.service.markup import EMPTY_VOTE_RESULT
 
 NEXT = 'next_'
 
