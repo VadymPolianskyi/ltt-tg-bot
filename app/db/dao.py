@@ -4,7 +4,7 @@ from typing import Optional
 import pymysql
 
 from app.config import config
-from app.db.entity import Activity, EventType, Event, EventStatistic
+from app.db.entity import Activity, EventType, Event, EventStatistic, User
 
 connection = pymysql.connect(
     host=config.DB_HOST,
@@ -41,7 +41,20 @@ class Dao:
 
 class UserDao(Dao):
     def __init__(self):
-        super().__init__()
+        self.__table = config.DB_TABLE_USER
+
+    def find(self, user_id: int) -> Optional[User]:
+        query = f'SELECT * FROM `{self.__table}` WHERE id=%s;'
+        r = self._select_one(query, user_id)
+        return User(id=r['id'], username=r['username'], time_zone=r['time_zone'], created=r['created']) if r else None
+
+    def save(self, user: User):
+        query = f'INSERT INTO `{self.__table}` (`id`, `username`, `time_zone`) VALUES (%s, %s, %s);'
+        self._execute(query, (user.id, user.username, user.time_zone))
+
+    def update_time_zone(self, user_id: int, time_zone: str):
+        query = f'UPDATE `{self.__table}` SET time_zone = %s WHERE id=%s;'
+        self._execute(query, (time_zone, user_id))
 
 
 class ActivityDao(Dao):

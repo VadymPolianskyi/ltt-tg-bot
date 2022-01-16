@@ -4,8 +4,8 @@ from typing import Optional
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
-def now():
-    return datetime.now()
+def now(tz: str = None) -> datetime:
+    return datetime.now(tz=ZoneInfo(tz)) if tz else datetime.now()
 
 
 def timedelta_to_minutes(spent: timedelta) -> int:
@@ -79,9 +79,7 @@ def plus(dt: datetime, months: int = 0, weeks: int = 0, days: int = 0, hours: in
 
 def is_valid_time_zone(time_zone: str) -> bool:
     try:
-        datetime.now(tz=ZoneInfo(time_zone))
+        now(tz=time_zone)
         return True
     except ZoneInfoNotFoundError as e:
         return False
-
-

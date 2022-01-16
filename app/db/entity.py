@@ -4,10 +4,10 @@ from enum import Enum
 
 
 class User:
-    def __init__(self, id: int, username: str, timezone: str = None, created: datetime = None):
+    def __init__(self, id: int, username: str, time_zone: str = None, created: datetime = None):
         self.id = id
         self.username = username
-        self.timezone = timezone
+        self.time_zone = time_zone
         self.created = created
 
 

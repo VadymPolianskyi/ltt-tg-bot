@@ -17,14 +17,18 @@ from app.handler.statistics.statistics import StatisticsHandler, StatisticsPostA
 from app.handler.track.start_tracking import StartTrackingHandler, StartTrackingAfterVoteCallbackHandler
 from app.handler.track.stop_tracking import StopTrackingAfterVoteCallbackHandler, StopTrackingHandler
 from app.handler.track.track import TrackHandler, TrackAfterVoteCallbackHandler, TrackPostTimeAnswerHandler
+from app.handler.user.time_zone import TimeZoneHandler, ChangeTimeZoneCallbackHandler, ChangeTimeZoneHandler
 from app.service.activity import ActivityService
 from app.service.event import EventService
 from app.service.statistics import StatisticsService
+from app.service.user import UserService
 
 server = Flask(__name__)
 bot = telebot.TeleBot(config.BOT_API_KEY, parse_mode="MARKDOWN")
+
 activities = ActivityService()
 events = EventService()
+user_service = UserService()
 statistics_service = StatisticsService()
 
 #### CALLBACK ####
@@ -41,7 +45,10 @@ delete_event_before_events_vote_callback_handler = DeleteEventBeforeEventsVoteCa
 delete_event_before_vote_callback_handler = DeleteEventBeforeVoteCallbackHandler(bot, statistics_service)
 delete_event_after_vote_callback_handler = DeleteEventAfterVoteCallbackHandler(bot, events)
 
-callback_router = CallbackRouter(
+change_time_zone_handler = ChangeTimeZoneHandler(bot, user_service)
+change_time_zone_callback_handler = ChangeTimeZoneCallbackHandler(bot, change_time_zone_handler)
+
+callback_router = CallbackRouter([
     delete_activity_before_vote_callback_handler,
     delete_activity_after_vote_callback_handler,
     track_after_vote_callback_handler,
@@ -49,7 +56,9 @@ callback_router = CallbackRouter(
     stop_tracking_after_vote_callback_handler,
     delete_event_before_events_vote_callback_handler,
     delete_event_before_vote_callback_handler,
-    delete_event_after_vote_callback_handler
+    delete_event_after_vote_callback_handler,
+    change_time_zone_callback_handler
+]
 )
 
 #### HANDLERS ####
@@ -66,6 +75,7 @@ last_events_handler = LastEventsHandler(bot, activities, last_events_post_answer
 statistics_post_answer_handler = StatisticsPostAnswerHandler(bot, statistics_service)
 statistics_handler = StatisticsHandler(bot, statistics_post_answer_handler)
 delete_event_handler = DeleteEventHandler(bot, activities)
+time_zone_handler = TimeZoneHandler(bot, user_service)
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -132,6 +142,16 @@ def last_events(message):
 @bot.message_handler(commands=['delete_event'])
 def last_events(message):
     delete_event_handler.handle(message)
+
+
+#####################
+#       USER        #
+#####################
+
+
+@bot.message_handler(commands=['time_zone'])
+def time_zone(message):
+    time_zone_handler.handle(message)
 
 
 #######################
