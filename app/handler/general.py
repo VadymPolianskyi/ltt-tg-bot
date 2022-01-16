@@ -36,8 +36,6 @@ class TelegramMessageHandler:
 
             print(f"Message '{text}' in chat({chat_id}) at '{time}'. Args: {','.join(args)}")
 
-            args = args + (message.from_user.username,)  # temp
-
             self.handle_(MessageMeta(chat_id, time, text), *args)
         except Exception as e:
             print(e)

@@ -38,10 +38,6 @@ class ActivityService:
         print(f'Found {len(started_activities)} started activities for user({str(user_id)})')
         return [a.name for a in started_activities]
 
-    def migrate_on_user_id(self, username: str, user_id: int):
-        self.dao.migrate_on_user_id(username, user_id)
-        self.event_dao.migrate_on_user_id(username, user_id)
-
 
 class EventService:
     def __init__(self):

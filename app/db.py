@@ -116,27 +116,6 @@ class ActivityDao(Dao):
             return [Activity(name=r['name'], user_id=user_id, created=r['created'], id=r['id']) for r in
                     cursor.fetchall()]
 
-    def migrate_on_user_id(self, username: str, user_id: int):
-        with connection.cursor() as cursor:
-            sql_query_1 = f"""
-            SELECT id FROM `{self._activity_table_name}` as a WHERE username=%s AND user_id is Null
-            """.replace("'", "")
-            cursor.execute(sql_query_1, username)
-            activity_ids = [r['id'] for r in cursor.fetchall()]
-
-            if activity_ids:
-                condition = " OR ".join(["id=%s " for _ in activity_ids])
-                parameters = tuple(activity_ids)
-
-                sql_query_2 = f"""
-                UPDATE `{self._activity_table_name}`
-                SET user_id=%s
-                WHERE {condition}
-                """.replace("'", "")
-                cursor.execute(sql_query_2, (user_id, *parameters))
-                connection.commit()
-                print(cursor.rowcount, "affected record(s) after updating 'activity'")
-
 
 class EventDao(Dao):
     def __init__(self):
@@ -194,26 +173,6 @@ class EventDao(Dao):
             DELETE FROM {self._event_table_name} WHERE {event_ids_conndition}
             """.replace("'", "")
             cursor.execute(sql_query, event_ids)
-
-    def migrate_on_user_id(self, username: str, user_id: int):
-        with connection.cursor() as cursor:
-            sql_query_1 = f"""
-                        SELECT id FROM `{self._event_table_name}` as e WHERE username=%s AND user_id is Null
-                        """.replace("'", "")
-            cursor.execute(sql_query_1, username)
-            event_ids = [r['id'] for r in cursor.fetchall()]
-            if event_ids:
-                condition = " OR ".join(["id=%s " for _ in event_ids])
-                parameters = tuple(event_ids)
-
-                sql_query_2 = f"""
-                            UPDATE `{self._event_table_name}`
-                            SET user_id=%s
-                            WHERE {condition}
-                            """.replace("'", "")
-                cursor.execute(sql_query_2, (user_id, *parameters))
-                connection.commit()
-                print(cursor.rowcount, "affected record(s) after updating 'event'")
 
 
 class StatisticsSelector(Dao):
