@@ -1,10 +1,11 @@
 from telebot import TeleBot
 
 from app.config import msg
-from app.db import EventType
+from app.db.entity import EventType
 from app.handler.general import TelegramMessageHandler, TelegramCallbackHandler, MessageMeta, CallbackMeta
-from app.service import ActivityService, EventService
-from app.util import markup, time
+from app.service import time_service, markup
+from app.service.activity import ActivityService
+from app.service.event import EventService
 
 
 class StopTrackingAfterVoteCallbackHandler(TelegramCallbackHandler):
@@ -27,7 +28,8 @@ class StopTrackingAfterVoteCallbackHandler(TelegramCallbackHandler):
             last=e_start.id
         )
 
-        hours, minutes = time.count_difference(e_start.time, e_stop.time)
+        start_time = e_start.time.astimezone(callback.time.tzinfo)
+        hours, minutes = time_service.count_difference(start_time, e_stop.time)
 
         self.bot.send_message(callback.user_id, msg.STOP_TRACKING_2_2.format(activity, hours, minutes))
 

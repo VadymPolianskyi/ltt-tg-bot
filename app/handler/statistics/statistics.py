@@ -2,7 +2,7 @@ from telebot import TeleBot
 
 from app.config import msg
 from app.handler.general import TelegramMessageHandler, MessageMeta
-from app.service import StatisticsService
+from app.service.statistics import StatisticsService
 
 
 class StatisticsPostAnswerHandler(TelegramMessageHandler):
@@ -12,8 +12,13 @@ class StatisticsPostAnswerHandler(TelegramMessageHandler):
         self.statistics_service = statistics_service
 
     def handle_(self, message: MessageMeta, *args):
-        date_range_inp: str = message.text
-        report_message: str = self.statistics_service.generate(message.user_id, date_range_inp).to_str()
+
+        report_message: str = self.statistics_service.generate(
+            user_id=message.user_id,
+            user_time_zone=str(message.time.tzinfo),
+            date_range=message.text
+        ).to_str()
+
         self.bot.send_message(message.user_id, report_message)
 
 
