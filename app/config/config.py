@@ -10,5 +10,6 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD")
 
 DB_TABLE_ACTIVITY = os.environ.get("DB_TABLE_ACTIVITY")
 DB_TABLE_EVENT = os.environ.get("DB_TABLE_EVENT")
+DB_TABLE_USER = os.environ.get("DB_TABLE_USER")
 
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
