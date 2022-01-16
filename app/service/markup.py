@@ -27,12 +27,3 @@ def create_inline_markup(key, button_name_value_tuples: list):
         )
 
     return activities_keyboard
-
-
-def create_reply_markup(button_names):
-    activities_keyboard = types.ReplyKeyboardMarkup()
-
-    for name in button_names:
-        activities_keyboard.add(types.KeyboardButton(text=name))
-
-    return activities_keyboard
