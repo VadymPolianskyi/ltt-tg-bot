@@ -1,3 +1,5 @@
+TIME_ZONE_COMMAND = "time\_zone"
+
 ACTIVITIES_COMMAND = "activities"
 ADD_ACTIVITY_COMMAND = "add\_activity"
 DELETE_ACTIVITY_COMMAND = "delete\_activity"
@@ -17,6 +19,8 @@ With me, you will know how really you spend your life.
 📊 Let's analyze your time!
 
 Commands:
+
+/{TIME_ZONE_COMMAND} - manage your time zone (`UTC` by default)
 
 /{ACTIVITIES_COMMAND} - show all activities
 /{ADD_ACTIVITY_COMMAND} - create a new activity
