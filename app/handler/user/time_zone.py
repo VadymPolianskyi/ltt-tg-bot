@@ -2,7 +2,7 @@ from telebot import TeleBot
 
 from app.config import msg
 from app.handler.general import TelegramMessageHandler, MessageMeta, TelegramCallbackHandler, CallbackMeta
-from app.service import markup, time
+from app.service import markup, time_service
 from app.service.user import UserService
 
 
@@ -19,7 +19,7 @@ class TimeZoneHandler(TelegramMessageHandler):
         )
 
         user_time_zone: str = self.user_service.get_time_zone(message.user_id)
-        current_time = time.now(tz=user_time_zone).strftime("%H:%M")
+        current_time = time_service.now(tz=user_time_zone).strftime("%H:%M")
         self.bot.send_message(chat_id=message.user_id, text=msg.TIMEZONE_1.format(user_time_zone, current_time),
                               reply_markup=options_keyboard)
 
@@ -46,9 +46,9 @@ class ChangeTimeZoneHandler(TelegramMessageHandler):
 
     def handle_(self, message: MessageMeta, *args):
         time_zone: str = message.text
-        if time.is_valid_time_zone(time_zone):
+        if time_service.is_valid_time_zone(time_zone):
             self.user_service.update_time_zone(message.user_id, time_zone)
-            current_time = time.now(tz=time_zone).strftime("%H:%M")
+            current_time = time_service.now(tz=time_zone).strftime("%H:%M")
 
             self.bot.send_message(message.user_id, msg.TIMEZONE_3.format(time_zone, current_time))
         else:

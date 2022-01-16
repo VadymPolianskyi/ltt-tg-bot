@@ -1,13 +1,12 @@
 from datetime import date
 from datetime import datetime
 
-import app.service.time as time_service
 from app.config import msg
 from app.db.dao import ActivityDao, EventDao, StatisticsSelector
 from app.db.entity import Event
 from app.db.entity import EventStatistic
-from app.service import time
-from app.service.time import timedelta_to_minutes, count_difference
+from app.service import time_service
+from app.service.time_service import timedelta_to_minutes, count_difference
 
 
 class ActivityStatistics:
@@ -122,15 +121,16 @@ class StatisticsService:
     def __init__(self):
         self.event_dao = EventDao()
         self.activity_dao = ActivityDao()
+        self.activity_dao = ActivityDao()
 
-    def generate(self, user_id: int, date_range: str) -> FullStatistics:
+    def generate(self, user_id: int, user_time_zone: str, date_range: str) -> FullStatistics:
         print(f'Generate statistic for user({user_id}) for {date_range}')
         extracted_date_range = time_service.extract_date_range(date_range)
         if extracted_date_range:
             from_d, until_d = extracted_date_range
         else:
             days, weeks, months = time_service.extract_days_weeks_months(date_range)
-            until_datetime = datetime.now()  # todo: select user timezone and calculate now for him
+            until_datetime = time_service.now(user_time_zone)
             from_d = time_service.minus(until_datetime, months=months, weeks=weeks, days=days)
             from_d = time_service.plus(from_d, days=1)
             from_d = from_d.date()
@@ -154,7 +154,7 @@ class StatisticsService:
             to_date = after_event.time
             activity_id = after_event.activity_id
         else:
-            to_date = time.now()
+            to_date = time_service.now()
             activity_id = self.activity_dao.find_by_user_id_and_name(user_id, activity_name).id
 
         events_statistics: list = StatisticsSelector(user_id) \

@@ -15,10 +15,12 @@ class UserService:
         self.dao.save(u)
         return u
 
-    def get_time_zone(self, user_id: int):
+    def get_time_zone(self, user_id: int) -> str:
         print(f'Get Time Zone for User({user_id})')
         u = self.dao.find(user_id)
-        return u.time_zone if u else self.DEFAULT_TIMEZONE
+        user_time_zone = u.time_zone if u else self.DEFAULT_TIMEZONE
+        print(f'User({user_id}) time zone is {user_time_zone}')
+        return user_time_zone
 
     def update_time_zone(self, user_id: int, time_zone: str):
         print(f'Update Time Zone for User({user_id})')

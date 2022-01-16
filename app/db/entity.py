@@ -25,12 +25,12 @@ class EventType(Enum):
 
 
 class Event:
-    def __init__(self, activity_id: str, event_type: EventType, user_id: int, id: str = None, last: str = None,
-                 time: datetime = None):
+    def __init__(self, activity_id: str, event_type: EventType, user_id: int, time: datetime, id: str = None,
+                 last: str = None):
         self.id = uuid.uuid4() if id is None else id
         self.activity_id = activity_id
         self.event_type = event_type
-        self.time = datetime.now() if time is None else time
+        self.time = time
         self.last = last
         self.user_id = user_id
 

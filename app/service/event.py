@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from app.db.dao import ActivityDao, EventDao
@@ -9,7 +10,8 @@ class EventService:
         self.dao = EventDao()
         self.activity_dao = ActivityDao()
 
-    def create(self, user_id: int, activity_name: str, event_type: EventType, last: str = None, time=None) -> Event:
+    def create(self, user_id: int, activity_name: str, event_type: EventType, time: datetime,
+               last: str = None) -> Event:
         a = self.activity_dao.find_by_user_id_and_name(user_id, activity_name)
         if not last:
             last_event = self.find_last(user_id, activity_name, EventType.STOP)
