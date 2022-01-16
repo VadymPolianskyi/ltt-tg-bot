@@ -1,6 +1,7 @@
 import re
 from datetime import datetime, timedelta
 from typing import Optional
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 def now():
@@ -74,3 +75,13 @@ def plus(dt: datetime, months: int = 0, weeks: int = 0, days: int = 0, hours: in
         days += months * 30
 
     return dt + timedelta(weeks=weeks, days=days, hours=hours, minutes=minutes)
+
+
+def is_valid_time_zone(time_zone: str) -> bool:
+    try:
+        datetime.now(tz=ZoneInfo(time_zone))
+        return True
+    except ZoneInfoNotFoundError as e:
+        return False
+
+

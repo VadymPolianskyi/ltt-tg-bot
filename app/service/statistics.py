@@ -1,8 +1,13 @@
-from datetime import datetime, date
+from datetime import date
+from datetime import datetime
 
+import app.service.time as time_service
 from app.config import msg
-from app.db import EventStatistic, Event
-from app.util.time import timedelta_to_minutes, count_difference
+from app.db.dao import ActivityDao, EventDao, StatisticsSelector
+from app.db.entity import Event
+from app.db.entity import EventStatistic
+from app.service import time
+from app.service.time import timedelta_to_minutes, count_difference
 
 
 class ActivityStatistics:
@@ -111,3 +116,69 @@ class FullStatistics:
         result = [DailyStatistics(activity_statistic=v, date=k) for k, v in grouped.items()]
 
         return result
+
+
+class StatisticsService:
+    def __init__(self):
+        self.event_dao = EventDao()
+        self.activity_dao = ActivityDao()
+
+    def generate(self, user_id: int, date_range: str) -> FullStatistics:
+        print(f'Generate statistic for user({user_id}) for {date_range}')
+        extracted_date_range = time_service.extract_date_range(date_range)
+        if extracted_date_range:
+            from_d, until_d = extracted_date_range
+        else:
+            days, weeks, months = time_service.extract_days_weeks_months(date_range)
+            until_datetime = datetime.now()  # todo: select user timezone and calculate now for him
+            from_d = time_service.minus(until_datetime, months=months, weeks=weeks, days=days)
+            from_d = time_service.plus(from_d, days=1)
+            from_d = from_d.date()
+            until_d = until_datetime.date()
+
+        assert from_d <= until_d
+        statistic: list = StatisticsSelector(user_id) \
+            .from_date(from_d) \
+            .to_date(until_d) \
+            .order_from_newest() \
+            .select()
+        activity_statistic: list = [ActivityStatistics.from_statistic(s) for s in statistic]
+
+        return FullStatistics(activity_statistic=activity_statistic, from_d=from_d, until_d=until_d)
+
+    def statistics_with_event_id(self, user_id: int, activity_name: str, after_event_id: str = None,
+                                 limit: int = 20) -> list:
+
+        if after_event_id:
+            after_event = self.event_dao.find(after_event_id)
+            to_date = after_event.time
+            activity_id = after_event.activity_id
+        else:
+            to_date = time.now()
+            activity_id = self.activity_dao.find_by_user_id_and_name(user_id, activity_name).id
+
+        events_statistics: list = StatisticsSelector(user_id) \
+            .activity_id(activity_id) \
+            .to_time(to_date) \
+            .limit(limit) \
+            .order_from_newest() \
+            .select()
+
+        statistics_with_id = list()
+        for es in events_statistics:
+            element = (es.stop_event_id, ActivityStatistics.from_statistic(es))
+            statistics_with_id.append(element)
+
+        return statistics_with_id
+
+    def last_events_statistics(self, user_id: int, limit: int = 20) -> list:
+        print(f"Find last {limit} events for user({str(user_id)})")
+
+        last_events_statistics = StatisticsSelector(user_id) \
+            .limit(limit) \
+            .order_from_newest() \
+            .select()
+
+        statistics = [ActivityStatistics.from_statistic(es) for es in last_events_statistics]
+
+        return statistics

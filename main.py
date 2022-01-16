@@ -17,7 +17,9 @@ from app.handler.statistics.statistics import StatisticsHandler, StatisticsPostA
 from app.handler.track.start_tracking import StartTrackingHandler, StartTrackingAfterVoteCallbackHandler
 from app.handler.track.stop_tracking import StopTrackingAfterVoteCallbackHandler, StopTrackingHandler
 from app.handler.track.track import TrackHandler, TrackAfterVoteCallbackHandler, TrackPostTimeAnswerHandler
-from app.service import ActivityService, EventService, StatisticsService
+from app.service.activity import ActivityService
+from app.service.event import EventService
+from app.service.statistics import StatisticsService
 
 server = Flask(__name__)
 bot = telebot.TeleBot(config.BOT_API_KEY, parse_mode="MARKDOWN")

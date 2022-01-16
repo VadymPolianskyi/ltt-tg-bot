@@ -2,7 +2,7 @@ from telebot import TeleBot
 
 from app.config import msg
 from app.handler.general import TelegramMessageHandler, MessageMeta
-from app.service import ActivityService
+from app.service.activity import ActivityService
 
 
 class AddActivityHandler(TelegramMessageHandler):
