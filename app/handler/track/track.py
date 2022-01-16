@@ -1,11 +1,11 @@
 from telebot import TeleBot
-from telebot.types import Message
 
 from app.config import msg
-from app.db import EventType
+from app.db.entity import EventType
 from app.handler.general import TelegramMessageHandler, TelegramCallbackHandler, MessageMeta, CallbackMeta
-from app.service import ActivityService, EventService
-from app.util import markup, time
+from app.service import time_service, markup
+from app.service.activity import ActivityService
+from app.service.event import EventService
 
 
 class TrackHandler(TelegramMessageHandler):
@@ -35,10 +35,10 @@ class TrackPostTimeAnswerHandler(TelegramMessageHandler):
         activity = args[0]
 
         hours_and_minutes_str: str = message.text
-        hours, minutes = time.extract_hours_and_minutes(hours_and_minutes_str)
+        hours, minutes = time_service.extract_hours_and_minutes(hours_and_minutes_str)
 
         end_time = message.time
-        start_time = time.minus(end_time, hours=hours, minutes=minutes)
+        start_time = time_service.minus(end_time, hours=hours, minutes=minutes)
 
         e_start = self.events.create(
             user_id=message.user_id,

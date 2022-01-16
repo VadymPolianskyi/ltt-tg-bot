@@ -1,3 +1,5 @@
+TIME_ZONE_COMMAND = "time\_zone"
+
 ACTIVITIES_COMMAND = "activities"
 ADD_ACTIVITY_COMMAND = "add\_activity"
 DELETE_ACTIVITY_COMMAND = "delete\_activity"
@@ -17,6 +19,8 @@ With me, you will know how really you spend your life.
 📊 Let's analyze your time!
 
 Commands:
+
+/{TIME_ZONE_COMMAND} - manage your time zone (`UTC` by default)
 
 /{ACTIVITIES_COMMAND} - show all activities
 /{ADD_ACTIVITY_COMMAND} - create a new activity
@@ -85,6 +89,15 @@ DELETE_EVENT_2_2 = "🤷 Can't find any events for the activity `{}`"
 DELETE_EVENT_3 = "🗑 Do you want to delete this event?"
 DELETE_EVENT_4_1 = "✅ Event deleted."
 DELETE_EVENT_5_1 = "❌ Deletion is canceled."
+
+# /time_zone
+
+TIMEZONE_BUTTON = "🌎 Change Time Zone"
+
+TIMEZONE_1 = "🕐 Your current Time Zone is `{}`. ⌚️ Your current time is `{}`"
+TIMEZONE_2 = "🌏 Please write your Time Zone in the format `Continent/City`. \nP.S. 🙋 this [site](http://www.timezoneconverter.com/cgi-bin/findzone.tzc) can help you to find your time zone."
+TIMEZONE_3 = "✅ Your Time Zone is changed on `{}`. ⌚️ Your current time is `{}`"
+
 
 # /statistics
 

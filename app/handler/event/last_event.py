@@ -2,7 +2,8 @@ from telebot import TeleBot
 
 from app.config import msg
 from app.handler.general import TelegramMessageHandler, MessageMeta
-from app.service import ActivityService, StatisticsService
+from app.service.activity import ActivityService
+from app.service.statistics import StatisticsService
 
 
 class LastEventsPostAnswerHandler(TelegramMessageHandler):
