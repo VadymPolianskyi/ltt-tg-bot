@@ -15,8 +15,7 @@ def timedelta_to_minutes(spent: timedelta) -> int:
 
 
 def count_difference(start_time: datetime, stop_time: datetime):
-    assert start_time.tzinfo == stop_time.tzinfo
-    diff_min = (stop_time - start_time).seconds / 60
+    diff_min = (stop_time.timestamp() - start_time.timestamp()) / 60
     hours = int(diff_min / 60)
     minutes = int(diff_min - (hours * 60))
     return hours, minutes
