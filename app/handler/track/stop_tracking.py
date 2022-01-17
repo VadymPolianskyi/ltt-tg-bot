@@ -28,8 +28,7 @@ class StopTrackingAfterVoteCallbackHandler(TelegramCallbackHandler):
             last=e_start.id
         )
 
-        start_time = e_start.time.astimezone(callback.time.tzinfo)
-        hours, minutes = time_service.count_difference(start_time, e_stop.time)
+        hours, minutes = time_service.count_difference(e_start.time, e_stop.time)
 
         self.bot.send_message(callback.user_id, msg.STOP_TRACKING_2_2.format(activity, hours, minutes))
 
