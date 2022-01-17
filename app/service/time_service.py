@@ -15,9 +15,12 @@ def timedelta_to_minutes(spent: timedelta) -> int:
 
 
 def count_difference(start_time: datetime, stop_time: datetime):
-    diff_min = (stop_time.timestamp() - start_time.timestamp()) / 60
-    hours = int(diff_min / 60)
-    minutes = int(diff_min - (hours * 60))
+    days_difference = stop_time.day - stop_time.day
+    hours_difference = stop_time.hour - start_time.hour
+    minutes_difference = stop_time.minute - start_time.minute
+
+    hours = int(hours_difference + (days_difference * 24))
+    minutes = int(minutes_difference)
     return hours, minutes
 
 
