@@ -18,6 +18,9 @@ def count_difference(start_time: datetime, stop_time: datetime):
     days_difference = stop_time.day - stop_time.day
     hours_difference = stop_time.hour - start_time.hour
     minutes_difference = stop_time.minute - start_time.minute
+    if minutes_difference < 0:
+        hours_difference = hours_difference - 1
+        minutes_difference = minutes_difference + 60
 
     hours = int(hours_difference + (days_difference * 24))
     minutes = int(minutes_difference)
