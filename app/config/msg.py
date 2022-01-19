@@ -1,5 +1,9 @@
 TIME_ZONE_COMMAND = "time\_zone"
 
+CATEGORIES_COMMAND = "categories"
+ADD_CATEGORY_COMMAND = "add\_category"
+DELETE_CATEGORY_COMMAND = "delete\_category"
+
 ACTIVITIES_COMMAND = "activities"
 ADD_ACTIVITY_COMMAND = "add\_activity"
 DELETE_ACTIVITY_COMMAND = "delete\_activity"
@@ -35,6 +39,20 @@ Commands:
 /{STATISTICS_COMMAND} - show statistics for the chosen time range
 """
 # /distracted - to write distracted time for your event.sql
+
+
+CATEGORY_SIGN = '📂'
+
+# /categories
+
+ALL_CATEGORIES = "📋 All your categories: {} \n\n/" + ADD_CATEGORY_COMMAND + " - ➕ add category \n/" + DELETE_CATEGORY_COMMAND + " - ➖ delete category "
+
+
+# /add_category
+
+ADD_CATEGORY_1 = """✍️ Write the name for a new 📂 Category: """
+ADD_CATEGORY_2 = "Created new 📂 Category with the name `{}`. \n\n/" + CATEGORIES_COMMAND + " - 👁 see all your categories"
+
 
 # universal
 
