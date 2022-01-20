@@ -10,6 +10,8 @@ from app.handler.activity.delete_activity import DeleteActivityHandler, DeleteAc
     DeleteActivityAfterVoteCallbackHandler
 from app.handler.category.add_category import AddCategoryPostAnswerHandler, AddCategoryHandler
 from app.handler.category.categories import CategoriesHandler
+from app.handler.category.delete_category import DeleteCategoryHandler, DeleteCategoryBeforeVoteCallbackHandler, \
+    DeleteCategoryAfterVoteCallbackHandler
 from app.handler.event.delete_event import DeleteEventHandler, DeleteEventBeforeEventsVoteCallbackHandler, \
     DeleteEventBeforeVoteCallbackHandler, DeleteEventAfterVoteCallbackHandler
 from app.handler.event.last_event import LastEventsPostAnswerHandler, LastEventsHandler
@@ -36,6 +38,9 @@ user_service = UserService()
 statistics_service = StatisticsService()
 
 #### CALLBACK ####
+delete_category_before_vote_callback_handler = DeleteCategoryBeforeVoteCallbackHandler(bot, categories, activities)
+delete_category_after_vote_callback_handler = DeleteCategoryAfterVoteCallbackHandler(bot, categories)
+
 delete_activity_before_vote_callback_handler = DeleteActivityBeforeVoteCallbackHandler(bot)
 delete_activity_after_vote_callback_handler = DeleteActivityAfterVoteCallbackHandler(bot, activities)
 
@@ -53,6 +58,8 @@ change_time_zone_handler = ChangeTimeZoneHandler(bot, user_service)
 change_time_zone_callback_handler = ChangeTimeZoneCallbackHandler(bot, change_time_zone_handler)
 
 callback_router = CallbackRouter([
+    delete_category_before_vote_callback_handler,
+    delete_category_after_vote_callback_handler,
     delete_activity_before_vote_callback_handler,
     delete_activity_after_vote_callback_handler,
     track_after_vote_callback_handler,
@@ -71,6 +78,7 @@ start_handler = StartHandler(bot)
 categories_handler = CategoriesHandler(bot, categories)
 add_category_post_answer_handler = AddCategoryPostAnswerHandler(bot, categories)
 add_category_handler = AddCategoryHandler(bot, add_category_post_answer_handler)
+delete_category_handler = DeleteCategoryHandler(bot, categories)
 # activity
 activities_handler = ActivitiesHandler(bot, activities)
 add_activity_post_answer_handler = AddActivityPostAnswerHandler(bot, activities)
@@ -132,9 +140,9 @@ def add_category(message):
     add_category_handler.handle(message)
 
 
-# @bot.message_handler(commands=['delete_category'])
-# def delete_category(message):
-#     delete_category_handler.handle(message)
+@bot.message_handler(commands=['delete_category'])
+def delete_category(message):
+    delete_category_handler.handle(message)
 
 
 @bot.message_handler(commands=['categories'])

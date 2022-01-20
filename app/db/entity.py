@@ -26,9 +26,14 @@ class Category:
     def from_dict(cls, r):
         return Category(id=r['id'], name=r['name'], user_id=r['user_id'], created=r['created'])
 
+    @classmethod
+    def default(cls):
+        return Category(name="default", user_id=0)
+
 
 class Activity:
-    def __init__(self, name: str, user_id: int, created: datetime = None, id: str = None, category: Category = None):
+    def __init__(self, name: str, user_id: int, created: datetime = None, id: str = None,
+                 category: Category = Category.default()):
         self.id = uuid.uuid4() if id is None else id
         self.name = name
         self.user_id = user_id
@@ -40,7 +45,7 @@ class Activity:
         if 'category_id' in r.keys() and 'category_name' in r.keys():
             category = Category(id=r['category_id'], name=r['category_name'], user_id=r['user_id'])
         else:
-            category = None
+            category = Category.default()
 
         return Activity(id=r['id'], name=r['name'], user_id=r['user_id'], created=r['created'], category=category)
 

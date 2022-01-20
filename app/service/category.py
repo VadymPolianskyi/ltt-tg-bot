@@ -16,10 +16,14 @@ class CategoryService:
         print(f"Delete Category({category_id})")
         self.dao.delete(category_id)
 
-    def show_all(self, user_id: int) -> list:
+    def all(self, user_id: int) -> list:
         print(f"Show all categories for User({str(user_id)})")
         return self.dao.find_all_by_user_id(user_id)
 
-    def show_all_titles(self, user_id: int) -> list:
+    def show_all_names(self, user_id: int) -> list:
         print(f"Show all category titles for User({str(user_id)})")
-        return [a.name for a in self.show_all(user_id)]
+        return [a.name for a in self.all(user_id)]
+
+    def find(self, category_id: str) -> Category:
+        print(f"Find Category({category_id})")
+        return self.dao.find(category_id)

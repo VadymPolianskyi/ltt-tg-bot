@@ -102,6 +102,12 @@ class ActivityDao(Dao):
         result = self._select_list(query, user_id)
         return [Activity.from_dict(r) for r in result]
 
+    def find_all_by_categoty_id(self, category_id: str) -> list:
+        print(f"Select all activities for category_id '{str(category_id)}")
+        query = f'SELECT * FROM `{self.__activity_table_name}` WHERE category_id=%s;'
+        result = self._select_list(query, category_id)
+        return [Activity.from_dict(r) for r in result]
+
     def find(self, activity_id: str) -> Optional[Activity]:
         query = f'SELECT * FROM `{self.__activity_table_name}` WHERE id=%s;'
         r = self._select_one(query, activity_id)

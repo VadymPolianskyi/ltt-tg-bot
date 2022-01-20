@@ -12,7 +12,7 @@ class CategoriesHandler(TelegramMessageHandler):
         self.categories = categories
 
     def handle_(self, message: MessageMeta, *args):
-        all_categories_titles = self.categories.show_all_titles(message.user_id)
+        all_categories_titles = self.categories.show_all_names(message.user_id)
         str_list = f"\n{msg.CATEGORY_SIGN} " + f"\n{msg.CATEGORY_SIGN} ".join(
             all_categories_titles) if all_categories_titles else "\n Nothing yet..."
         self.bot.send_message(message.user_id, msg.ALL_CATEGORIES.format(str_list))

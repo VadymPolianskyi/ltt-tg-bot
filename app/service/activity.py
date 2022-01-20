@@ -32,3 +32,9 @@ class ActivityService:
         started_activities = self.dao.find_last_started(user_id)
         print(f'Found {len(started_activities)} started activities for user({str(user_id)})')
         return [a.name for a in started_activities]
+
+    def find_all(self, category_id: str) -> list:
+        print(f"Find all activities for Category({category_id})")
+        activities = self.dao.find_all_by_categoty_id(category_id)
+        print(f"Found {len(activities)} activities for Category({category_id})")
+        return activities
