@@ -26,4 +26,4 @@ class AddCategoryPostAnswerHandler(TelegramMessageHandler):
         category_name = message.text
         category = self.categories.create(message.user_id, category_name)
 
-        self.bot.send_message(message.user_id, msg.ADD_ACTIVITY_2.format(category.name))
+        self.bot.send_message(message.user_id, msg.ADD_CATEGORY_2.format(category.name))

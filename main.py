@@ -69,7 +69,7 @@ callback_router = CallbackRouter([
 start_handler = StartHandler(bot)
 # category
 categories_handler = CategoriesHandler(bot, categories)
-add_category_post_answer_handler = AddCategoryPostAnswerHandler(bot, activities)
+add_category_post_answer_handler = AddCategoryPostAnswerHandler(bot, categories)
 add_category_handler = AddCategoryHandler(bot, add_category_post_answer_handler)
 # activity
 activities_handler = ActivitiesHandler(bot, activities)
