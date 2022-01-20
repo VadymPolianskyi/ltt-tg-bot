@@ -45,7 +45,7 @@ CATEGORY_SIGN = '📂'
 
 # /categories
 
-ALL_CATEGORIES = "📋 All your categories: {} \n\n/" + ADD_CATEGORY_COMMAND + " - ➕ add category \n/" + DELETE_CATEGORY_COMMAND + " - ➖ delete category "
+ALL_CATEGORIES = "🗄 All your categories: \n{} \n\n/" + ADD_CATEGORY_COMMAND + " - ➕ add category \n/" + DELETE_CATEGORY_COMMAND + " - ➖ delete category "
 
 
 # /add_category
