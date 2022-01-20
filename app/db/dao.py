@@ -4,7 +4,7 @@ from typing import Optional
 import pymysql
 
 from app.config import config
-from app.db.entity import Activity, EventType, Event, EventStatistic, User
+from app.db.entity import Activity, EventType, Event, EventStatistic, User, Category
 
 connection = pymysql.connect(
     host=config.DB_HOST,
@@ -46,7 +46,7 @@ class UserDao(Dao):
     def find(self, user_id: int) -> Optional[User]:
         query = f'SELECT * FROM `{self.__table}` WHERE id=%s;'
         r = self._select_one(query, user_id)
-        return User(id=r['id'], username=r['username'], time_zone=r['time_zone'], created=r['created']) if r else None
+        return User.from_dict(r) if r else None
 
     def save(self, user: User):
         query = f'INSERT INTO `{self.__table}` (`id`, `username`, `time_zone`) VALUES (%s, %s, %s);'
@@ -55,6 +55,32 @@ class UserDao(Dao):
     def update_time_zone(self, user_id: int, time_zone: str):
         query = f'UPDATE `{self.__table}` SET time_zone = %s WHERE id=%s;'
         self._execute(query, (time_zone, user_id))
+
+
+class CategoryDao(Dao):
+    def __init__(self):
+        self.__category_table_name = config.DB_TABLE_CATEGORY
+
+    def save(self, category: Category):
+        query = f'INSERT INTO `{self.__category_table_name}` (`id`, `user_id`, `name`) VALUES (%s, %s, %s);'
+        self._execute(query, (category.id, category.user_id, category.name))
+
+    def delete(self, id: str):
+        print(f"Delete Category({id})")
+        query = f'DELETE FROM `{self.__category_table_name}` WHERE id=%s'
+        self._execute(query, id)
+
+    def find_all_by_user_id(self, user_id: int) -> list:
+        print(f"Select all categories for User({user_id})")
+        query = f'SELECT * FROM `{self.__category_table_name}` WHERE user_id=%s;'
+        result = self._select_list(query, user_id)
+        return [Category.from_dict(r) for r in result]
+
+    def find(self, id: str) -> Optional[Category]:
+        print(f"Find Category({id})")
+        query = f'SELECT * FROM `{self.__category_table_name}` WHERE id=%s;'
+        r = self._select_one(query, id)
+        return Category.from_dict(r) if r else None
 
 
 class ActivityDao(Dao):
@@ -74,17 +100,24 @@ class ActivityDao(Dao):
         print(f"Select all activities for user_id '{str(user_id)}")
         query = f'SELECT * FROM `{self.__activity_table_name}` WHERE user_id=%s;'
         result = self._select_list(query, user_id)
-        return [Activity(name=r['name'], user_id=r['user_id'], created=r['created'], id=r['id']) for r in result]
+        return [Activity.from_dict(r) for r in result]
+
+    def find_all_by_categoty_id(self, category_id: str) -> list:
+        print(f"Select all activities for category_id '{str(category_id)}")
+        query = f'SELECT * FROM `{self.__activity_table_name}` WHERE category_id=%s;'
+        result = self._select_list(query, category_id)
+        return [Activity.from_dict(r) for r in result]
 
     def find(self, activity_id: str) -> Optional[Activity]:
         query = f'SELECT * FROM `{self.__activity_table_name}` WHERE id=%s;'
         r = self._select_one(query, activity_id)
-        return Activity(name=r['name'], user_id=r['user_id'], created=r['created'], id=r['id']) if r else None
+        return Activity.from_dict(r) if r else None
 
+    # todo: replace this on querying by id
     def find_by_user_id_and_name(self, user_id: int, activity_name: str):
         query = f'SELECT * FROM `{self.__activity_table_name}` WHERE user_id=%s AND name=%s;'
         r = self._select_one(query, (user_id, activity_name))
-        return Activity(name=r['name'], user_id=r['user_id'], created=r['created'], id=r['id']) if r else None
+        return Activity.from_dict(r) if r else None
 
     def find_last_started(self, user_id: int) -> list:
         query = f"""
@@ -94,7 +127,7 @@ class ActivityDao(Dao):
                 AND  e.id NOT IN (SELECT `last` FROM `{self.__event_table_name}` WHERE `user_id`=%s)
                 """
         result = self._select_list(query, (user_id, EventType.START.name, user_id))
-        return [Activity(name=r['name'], user_id=user_id, created=r['created'], id=r['id']) for r in result]
+        return [Activity.from_dict(r) for r in result]
 
 
 class EventDao(Dao):
@@ -113,8 +146,7 @@ class EventDao(Dao):
         query = f'SELECT * FROM `{self.__event_table_name}` WHERE `id`=%s;'
         r = self._select_one(query, event_id)
 
-        return Event(id=r['id'], activity_id=r['activity_id'], event_type=r['type'], time=r['time'],
-                     user_id=r['user_id'], last=r['last']) if r else None
+        return Event.from_dict(r) if r else None
 
     def find_last_event_for_activity(self, user_id: int, activity_name: str, event_type: EventType) -> Optional[Event]:
         query = f"""
@@ -126,8 +158,7 @@ class EventDao(Dao):
                 LIMIT 1
         """
         r = self._select_one(query, (activity_name, user_id, event_type.name, user_id))
-        return Event(id=r['id'], activity_id=r['activity_id'], event_type=r['type'], time=r['time'],
-                     user_id=r['user_id'], last=r['last']) if r else None
+        return Event.from_dict(r) if r else None
 
     def delete_all_for_activity(self, activity_id: str):
         query = f'DELETE FROM {self.__event_table_name} WHERE activity_id=%s'
@@ -233,5 +264,4 @@ class StatisticsSelector(Dao):
         self.__prepare_query_params()
 
         result = self._select_list(self.__build_sql_query(), self.__query_parameters)
-        return [EventStatistic(date=r['ev_date'], spent=r['spent'], activity_name=r['activity'],
-                               stop_event_id=r['event_id']) for r in result]
+        return [EventStatistic.from_dict(r) for r in result]

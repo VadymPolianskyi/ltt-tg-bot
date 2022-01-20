@@ -1,5 +1,9 @@
 TIME_ZONE_COMMAND = "time\_zone"
 
+CATEGORIES_COMMAND = "categories"
+ADD_CATEGORY_COMMAND = "add\_category"
+DELETE_CATEGORY_COMMAND = "delete\_category"
+
 ACTIVITIES_COMMAND = "activities"
 ADD_ACTIVITY_COMMAND = "add\_activity"
 DELETE_ACTIVITY_COMMAND = "delete\_activity"
@@ -36,9 +40,32 @@ Commands:
 """
 # /distracted - to write distracted time for your event.sql
 
+
 # universal
 
 CHOOSE_ACTIVITY = """🪄 Please choose an activity:"""
+CHOOSE_CATEGORY = """🪄 Please choose a category:"""
+
+CATEGORY_SIGN = '📂'
+
+# /categories
+
+ALL_CATEGORIES = "🗄 All your categories: \n{} \n\n/" + ADD_CATEGORY_COMMAND + " - ➕ add category \n/" + DELETE_CATEGORY_COMMAND + " - ➖ delete category "
+
+
+# /add_category
+
+ADD_CATEGORY_1 = """✍️ Write the name for a new 📂 Category: """
+ADD_CATEGORY_2 = "Created new 📂 Category with the name `{}`. \n\n/" + CATEGORIES_COMMAND + " - 👁 see all your categories"
+
+# /delete_activity
+
+DELETE_CATEGORY_1 = CHOOSE_CATEGORY
+DELETE_CATEGORY_2 = "🗑 Do you want to delete the category `{}`?"
+DELETE_CATEGORY_3 = "❌ You can't delete the category that contains activities. 🚮 Please clear all activities in category `{}`."
+DELETE_CATEGORY_4 = "✅ Deleted category with the name `{}`. \n\n/" + CATEGORIES_COMMAND + " - 👁 see all your categories"
+DELETE_CATEGORY_5 = "❌ Deletion is canceled. \n\n/" + CATEGORIES_COMMAND + " - 👁 see all your categories"
+
 
 # /activities
 
