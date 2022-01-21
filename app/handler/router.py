@@ -1,6 +1,6 @@
 import json
 
-from telebot.types import CallbackQuery
+from aiogram.types import CallbackQuery
 
 
 class CallbackRouter:
@@ -11,11 +11,11 @@ class CallbackRouter:
 
         self.callback_handler: dict = callback_handlers_dict
 
-    def route(self, call: CallbackQuery):
+    async def route(self, call: CallbackQuery):
         payload: dict = json.loads(call.data)
 
         for key in payload.keys():
             if key in self.callback_handler:
                 print(f"Found route for callback '{key}' from user({call.from_user.id})")
-                self.callback_handler[key].handle(call)
+                await self.callback_handler[key].handle(call)
                 break

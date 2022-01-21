@@ -91,5 +91,9 @@ def is_valid_time_zone(time_zone: str) -> bool:
         return False
 
 
+def to_tz(t: datetime, tz: str):
+    return t.astimezone(tz=ZoneInfo(tz))
+
+
 def from_timestamp(t: int, tz: str):
     return datetime.fromtimestamp(t, ZoneInfo(tz))
