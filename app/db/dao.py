@@ -79,6 +79,7 @@ class CategoryDao(Dao):
         print(f"Select all categories for User({user_id})")
         query = f'SELECT * FROM `{self.__category_table_name}` WHERE user_id=%s;'
         result = self._select_list(query, user_id)
+        print(f"Selected {len(result)} categories for User({user_id})")
         return [Category.from_dict(r) for r in result]
 
     def find(self, id: str) -> Optional[Category]:
@@ -87,6 +88,10 @@ class CategoryDao(Dao):
         r = self._select_one(query, id)
         return Category.from_dict(r) if r else None
 
+    def update(self, category: Category):
+        query = f'UPDATE `{self.__category_table_name}` SET name = %s WHERE id=%s;'
+        self._execute(query, (category.name, category.id))
+
 
 class ActivityDao(Dao):
     def __init__(self):
@@ -94,12 +99,12 @@ class ActivityDao(Dao):
         self.__event_table_name = config.DB_TABLE_EVENT
 
     def save(self, activity: Activity):
-        query = f'INSERT INTO `{self.__activity_table_name}` (`id`, `user_id`, `name`) VALUES (%s, %s, %s);'
-        self._execute(query, (activity.id, activity.user_id, activity.name))
+        query = f'INSERT INTO `{self.__activity_table_name}` (`id`, `user_id`, `name`, `category_id`) VALUES (%s, %s, %s, %s);'
+        self._execute(query, (activity.id, activity.user_id, activity.name, activity.category_id))
 
-    def delete(self, user_id: int, name):
-        query = f'DELETE FROM `{self.__activity_table_name}` WHERE user_id=%s AND name=%s'
-        self._execute(query, (user_id, name))
+    def delete(self, activity_id: str):
+        query = f'DELETE FROM `{self.__activity_table_name}` WHERE id=%s'
+        self._execute(query, (activity_id))
 
     def find_all_by_user_id(self, user_id: int) -> list:
         print(f"Select all activities for user_id '{str(user_id)}")
@@ -107,7 +112,7 @@ class ActivityDao(Dao):
         result = self._select_list(query, user_id)
         return [Activity.from_dict(r) for r in result]
 
-    def find_all_by_categoty_id(self, category_id: str) -> list:
+    def find_all_by_category(self, category_id: str) -> list:
         print(f"Select all activities for category_id '{str(category_id)}")
         query = f'SELECT * FROM `{self.__activity_table_name}` WHERE category_id=%s;'
         result = self._select_list(query, category_id)
@@ -133,6 +138,10 @@ class ActivityDao(Dao):
                 """
         result = self._select_list(query, (user_id, EventType.START.name, user_id))
         return [Activity.from_dict(r) for r in result]
+
+    def update(self, activity: Activity):
+        query = f'UPDATE `{self.__activity_table_name}` SET name = %s, category_id = %s WHERE id=%s;'
+        self._execute(query, (activity.name, activity.category_id, activity.id))
 
 
 class EventDao(Dao):

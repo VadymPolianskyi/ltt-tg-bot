@@ -40,13 +40,33 @@ Commands:
 """
 
 MENU = """
-With me, you will know how really you spend your life.
-📊 Let's analyze your time!
+With me, you will know how really you spend your life 🚀
+Let's analyze your time!
 
-Choose:
+🪄 Choose:
 """
 # /distracted - to write distracted time for your event.sql
 
+
+# BUTTONS
+CATEGORIES_BUTTON = '📂 Categories'
+
+ADD_CATEGORY_BUTTON = "➕ Add Category"
+ADD_ACTIVITY_BUTTON = "➕ Add Activity"
+
+SETTINGS_CATEGORY_BUTTON = "⚙️ Settings"
+EDIT_NAME_BUTTON = "✏️ Edit name"
+DELETE_BUTTON = "🗑️ Delete"
+CHANGE_CATEGORY_BUTTON = "📂 Change Category"
+
+START_TRACKING_BUTTON = '▶️ Start Tracking'
+STOP_TRACKING_BUTTON = '⏹ Stop Tracking'
+TRACK_BUTTON = '⏱ Track'
+
+STATISTICS_BUTTON = '📊 Statistics'
+
+
+BACK_BUTTON = '🔙 Back'
 
 # universal
 
@@ -55,40 +75,41 @@ CHOOSE_CATEGORY = """🪄 Please choose a category:"""
 
 CATEGORY_SIGN = '📂'
 
-# /categories
+# Category
 
-ALL_CATEGORIES = "🗄 All your categories: \n{} \n\n/" + ADD_CATEGORY_COMMAND + " - ➕ add category \n/" + DELETE_CATEGORY_COMMAND + " - ➖ delete category "
+ALL_CATEGORIES = '🗄 All your categories:'
 
+ADD_CATEGORY = """✍️ Write the name for a new 📂 Category: """
+ADD_CATEGORY_DONE = "Created new 📂 Category with the name `{}`."
 
-# /add_category
+CATEGORY = "📂 Category `{}`:"
 
-ADD_CATEGORY_1 = """✍️ Write the name for a new 📂 Category: """
-ADD_CATEGORY_2 = "Created new 📂 Category with the name `{}`. \n\n/" + CATEGORIES_COMMAND + " - 👁 see all your categories"
+EDIT_CATEGORY_NAME = "✍️ Write a new name for the 📂 Category `{}`:"
+EDIT_CATEGORY_NAME_DONE = "Changed name 📂 `{}` ->  📂 `{}`."
 
-# /delete_activity
+ALL_CATEGORY_ACTIVITIES = "📂 Category `{}`:"
 
-DELETE_CATEGORY_1 = CHOOSE_CATEGORY
-DELETE_CATEGORY_2 = "🗑 Do you want to delete the category `{}`?"
-DELETE_CATEGORY_3 = "❌ You can't delete the category that contains activities. 🚮 Please clear all activities in category `{}`."
-DELETE_CATEGORY_4 = "✅ Deleted category with the name `{}`. \n\n/" + CATEGORIES_COMMAND + " - 👁 see all your categories"
-DELETE_CATEGORY_5 = "❌ Deletion is canceled. \n\n/" + CATEGORIES_COMMAND + " - 👁 see all your categories"
+DELETE_CATEGORY = "🗑 Do you want to delete the 📂 Category `{}`?"
+DELETE_CATEGORY_REGECT = "❌ You can't delete the category that contains activities. 🚮 Please clear all activities in 📂 Category `{}`."
+DELETE_CATEGORY_DONE = "✅ Deleted 📂 Category `{}`."
+DELETE_CATEGORY_CANCEL = "❌ Deletion is canceled."
 
+# Activity
 
-# /activities
+ADD_ACTIVITY = "✍️ Write the name for a new activity: "
+ADD_ACTIVITY_DONE = "✅ Created new activity with the name `{}`"
 
-ALL_ACTIVITIES = "📋 All your activities: {} \n\n/" + ADD_ACTIVITY_COMMAND + " - ➕ add activity \n/" + DELETE_ACTIVITY_COMMAND + " - ➖ delete activity "
+ACTIVITY_SETTINGS = "Activity `{}` settings:"
 
-# /add_activity
+EDIT_ACTIVITY_NAME = "✍️ Write a new name for the Activity `{}`:"
+EDIT_ACTIVITY_NAME_DONE = "✅ Changed Activity name `{}` -> `{}`."
 
-ADD_ACTIVITY_1 = """✍️ Write the name for a new activity: """
-ADD_ACTIVITY_2 = "Created new activity with the name `{}`. \n\n/" + ACTIVITIES_COMMAND + " - 👁 see all your activities"
+EDIT_ACTIVITY_CATEGORY = "🪄 Please choose a new 📂 Category for Activity `{}`:"
+EDIT_ACTIVITY_CATEGORY_DONE = "✅ Moved Activity `{}` to 📂 Category `{}`."
 
-# /delete_activity
-
-DELETE_ACTIVITY_1 = CHOOSE_ACTIVITY
-DELETE_ACTIVITY_2 = """🗑 Do you want to delete the activity `{}`?"""
-DELETE_ACTIVITY_3_1 = "✅ Deleted activity with the name `{}`. \n\n/" + ACTIVITIES_COMMAND + " - 👁 see all your activities"
-DELETE_ACTIVITY_4_1 = "❌ Deletion is canceled. \n\n/" + ACTIVITIES_COMMAND + " - 👁 see all your activities"
+DELETE_ACTIVITY_2 = "🗑 Do you want to delete the activity `{}`?"
+DELETE_ACTIVITY_3_1 = "✅ Deleted Activity `{}`"
+DELETE_ACTIVITY_4_1 = "❌ Deletion is canceled."
 
 # /track
 
@@ -131,7 +152,6 @@ TIMEZONE_BUTTON = "🌎 Change Time Zone"
 TIMEZONE_1 = "🕐 Your current Time Zone is `{}`. ⌚️ Your current time is `{}`"
 TIMEZONE_2 = "🌏 Please write your Time Zone in the format `Continent/City`. (MAKE SURE that you've finished all your events before changing Time Zone) \nP.S. 🙋 this [site](http://www.timezoneconverter.com/cgi-bin/findzone.tzc) can help you to find your time zone."
 TIMEZONE_3 = "✅ Your Time Zone is changed on `{}`. ⌚️ Your current time is `{}`"
-
 
 # /statistics
 

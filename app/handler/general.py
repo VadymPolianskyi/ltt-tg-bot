@@ -54,7 +54,7 @@ class TelegramMessageHandler:
 
 
 class TelegramCallbackHandler:
-    def __init__(self, smth=None):
+    def __init__(self):
         self.user_service = UserService()
 
     async def handle(self, call: CallbackQuery):
@@ -72,6 +72,6 @@ class TelegramCallbackHandler:
             print(e)
             await call.answer(user_id, msg.ERROR_BASIC)
 
-    async def handle_(self, call: CallbackQuery):
+    async def handle_(self, call: CallbackMeta):
         """Response to Callback Message"""
         pass

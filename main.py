@@ -1,19 +1,25 @@
+import asyncio
+
 from aiogram import Bot, Dispatcher, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 
 from app.config import config
-from app.handler.activity.activities import ActivitiesHandler
-from app.handler.activity.add_activity import AddActivityHandler, AddActivityPostAnswerHandler
-from app.handler.activity.delete_activity import DeleteActivityHandler, DeleteActivityBeforeVoteCallbackHandler, \
-    DeleteActivityAfterVoteCallbackHandler
-from app.handler.category.add_category import AddCategoryPostAnswerHandler, AddCategoryHandler
-from app.handler.category.categories import CategoriesHandler
-from app.handler.category.delete_category import DeleteCategoryHandler, DeleteCategoryBeforeVoteCallbackHandler, \
+from app.handler.activity.add_activity import AddActivityCallbackHandler, AddActivityPostAnswerHandler
+from app.handler.activity.delete_activity import DeleteActivityAfterVoteCallbackHandler, DeleteActivityCallbackHandler
+from app.handler.activity.edit_activity import EditActivityNameCallbackHandler, EditActivityNameAfterAnswerHandler, \
+    EditActivityCategoryCallbackHandler, EditActivityCategoryAfterAnswerCallbackHandler
+from app.handler.activity.settings_activity import SettingsActivityCallbackHandler
+from app.handler.category.add_category import AddCategoryAfterAnswerHandler, AddCategoryCallbackHandler
+from app.handler.category.category import CategoriesCallbackHandler, CategoryCallbackHandler
+from app.handler.category.delete_category import DeleteCategoryCallbackHandler, \
     DeleteCategoryAfterVoteCallbackHandler
+from app.handler.category.edit_category import EditCategoryNameAfterAnswerHandler, EditCategoryNameCallbackHandler
+from app.handler.category.settings_category import SettingsCategoryCallbackHandler
 from app.handler.event.delete_event import DeleteEventHandler, DeleteEventBeforeEventsVoteCallbackHandler, \
     DeleteEventBeforeVoteCallbackHandler, DeleteEventAfterVoteCallbackHandler
 from app.handler.event.last_event import LastEventsPostAnswerHandler, LastEventsHandler
+from app.handler.menu import MenuHandler, MenuCallbackHandler
 from app.handler.router import CallbackRouter
 from app.handler.start import StartHandler
 from app.handler.statistics.statistics import StatisticsHandler, StatisticsPostAnswerHandler
@@ -27,7 +33,7 @@ from app.service.event import EventService
 from app.service.statistics import StatisticsService
 from app.service.user import UserService
 from app.state import CreateActivityState, CreateCategoryState, TrackWriteTimeRangeState, StatisticWriteTimeRangeState, \
-    TimeZoneWriteTZNameState, LastEventsWriteCountState
+    TimeZoneWriteTZNameState, LastEventsWriteCountState, EditCategoryState, EditActivityState
 
 bot = Bot(token=config.BOT_API_KEY, parse_mode="Markdown")
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -38,53 +44,54 @@ events = EventService()
 user_service = UserService()
 statistics_service = StatisticsService()
 
-#### CALLBACK ####
-delete_category_before_vote_callback_handler = DeleteCategoryBeforeVoteCallbackHandler(categories, activities)
-delete_category_after_vote_callback_handler = DeleteCategoryAfterVoteCallbackHandler(categories)
-
-delete_activity_before_vote_callback_handler = DeleteActivityBeforeVoteCallbackHandler()
-delete_activity_after_vote_callback_handler = DeleteActivityAfterVoteCallbackHandler(activities)
-
-track_after_choise_callback_handler = TrackAfterChoiseCallbackHandler()
 track_after_time_answer_handler = TrackAfterTimeAnswerHandler(events)
-
-start_tracking_after_vote_callback_handler = StartTrackingAfterVoteCallbackHandler(events)
-stop_tracking_after_vote_callback_handler = StopTrackingAfterVoteCallbackHandler(events)
-
-delete_event_before_events_vote_callback_handler = DeleteEventBeforeEventsVoteCallbackHandler(statistics_service)
-delete_event_before_vote_callback_handler = DeleteEventBeforeVoteCallbackHandler(statistics_service)
-delete_event_after_vote_callback_handler = DeleteEventAfterVoteCallbackHandler(events)
-
 change_time_zone_handler = ChangeTimeZoneHandler(user_service)
-change_time_zone_callback_handler = ChangeTimeZoneCallbackHandler()
+
+#### CALLBACK ####
 
 callback_router = CallbackRouter([
-    delete_category_before_vote_callback_handler,
-    delete_category_after_vote_callback_handler,
-    delete_activity_before_vote_callback_handler,
-    delete_activity_after_vote_callback_handler,
-    track_after_choise_callback_handler,
-    start_tracking_after_vote_callback_handler,
-    stop_tracking_after_vote_callback_handler,
-    delete_event_before_events_vote_callback_handler,
-    delete_event_before_vote_callback_handler,
-    delete_event_after_vote_callback_handler,
-    change_time_zone_callback_handler
-]
-)
+    MenuCallbackHandler(),
+
+    CategoriesCallbackHandler(categories, activities),
+    CategoryCallbackHandler(categories),
+    AddCategoryCallbackHandler(),
+    SettingsCategoryCallbackHandler(categories),
+    EditCategoryNameCallbackHandler(categories),
+    DeleteCategoryCallbackHandler(categories, activities),
+    DeleteCategoryAfterVoteCallbackHandler(categories),
+
+    AddActivityCallbackHandler(),
+    SettingsActivityCallbackHandler(activities),
+    EditActivityNameCallbackHandler(activities),
+    EditActivityCategoryCallbackHandler(activities, categories),
+    EditActivityCategoryAfterAnswerCallbackHandler(activities, categories),
+    DeleteActivityCallbackHandler(activities),
+    DeleteActivityAfterVoteCallbackHandler(activities, categories),
+
+    TrackAfterChoiseCallbackHandler(),
+
+    StartTrackingAfterVoteCallbackHandler(events),
+    StopTrackingAfterVoteCallbackHandler(events),
+
+    DeleteEventBeforeEventsVoteCallbackHandler(statistics_service),
+    DeleteEventBeforeVoteCallbackHandler(statistics_service),
+    DeleteEventAfterVoteCallbackHandler(events),
+
+    ChangeTimeZoneCallbackHandler()
+])
 
 #### HANDLERS ####
 start_handler = StartHandler()
+menu_handler = MenuHandler()
+
 # category
-categories_handler = CategoriesHandler(categories)
-add_category_post_answer_handler = AddCategoryPostAnswerHandler(categories)
-add_category_handler = AddCategoryHandler()
-delete_category_handler = DeleteCategoryHandler(categories)
+add_category_after_answer_handler = AddCategoryAfterAnswerHandler(categories)
+edit_category_name_after_answer_handler = EditCategoryNameAfterAnswerHandler(categories)
+
 # activity
-activities_handler = ActivitiesHandler(activities)
-add_activity_handler = AddActivityHandler()
 add_activity_post_answer_handler = AddActivityPostAnswerHandler(activities)
-delete_activity_handler = DeleteActivityHandler(activities)
+edit_activity_name_after_answer_handler = EditActivityNameAfterAnswerHandler(activities)
+
 # track
 track_handler = TrackHandler(activities)
 start_tracking_handler = StartTrackingHandler(activities)
@@ -92,28 +99,30 @@ stop_tracking_handler = StopTrackingHandler(activities, events)
 last_events_post_answer_handler = LastEventsPostAnswerHandler(activities, statistics_service)
 last_events_handler = LastEventsHandler(activities)
 delete_event_handler = DeleteEventHandler(activities)
+
 # statistics
 statistics_post_answer_handler = StatisticsPostAnswerHandler(statistics_service)
 statistics_handler = StatisticsHandler()
+
 # user
 time_zone_handler = TimeZoneHandler(user_service)
 
 
-# async def set_commands(bot: Bot):
-#     commands = [BotCommand(command="/menu", description="Show menu")]
-#     await bot.set_my_commands(commands)
-
-
-@dp.message_handler(commands=['start', 'help', 'menu'])
-async def main(message):
+@dp.message_handler(commands=['start', 'help'])
+async def start(message):
     await start_handler.handle(message)
+
+
+@dp.message_handler(commands=['menu'])
+async def menu(message):
+    await menu_handler.handle(message)
 
 
 #################################
 #       GENERAL CALLBACK        #
 #################################
 
-@dp.callback_query_handler()
+@dp.callback_query_handler(state="*")
 async def callback_handler(call):
     await callback_router.route(call)
 
@@ -122,16 +131,6 @@ async def callback_handler(call):
 #       ACTIVITY        #
 #########################
 
-@dp.message_handler(commands=['activities'])
-async def activities_(message):
-    await activities_handler.handle(message)
-
-
-@dp.message_handler(commands=['add_activity'])
-async def add_activity(message):
-    await add_activity_handler.handle(message)
-    await CreateActivityState.waiting_for_activity_name.set()
-
 
 @dp.message_handler(state=CreateActivityState.waiting_for_activity_name)
 async def add_activity_post_answer(message, state: FSMContext):
@@ -139,35 +138,26 @@ async def add_activity_post_answer(message, state: FSMContext):
     await state.finish()
 
 
-@dp.message_handler(commands=['delete_activity'])
-async def delete_activity(message):
-    await delete_activity_handler.handle(message)
+@dp.message_handler(state=EditActivityState.waiting_for_activity_name)
+async def edit_activity_name_after_answer(message, state: FSMContext):
+    await edit_activity_name_after_answer_handler.handle(message)
+    await state.finish()
 
 
 #########################
 #       CATEGORY        #
 #########################
 
-@dp.message_handler(commands=['categories'])
-async def categories_(message):
-    await categories_handler.handle(message)
-
-
-@dp.message_handler(commands=['add_category'])
-async def add_category(message):
-    await add_category_handler.handle(message)
-    await CreateCategoryState.waiting_for_category_name.set()
-
-
 @dp.message_handler(state=CreateCategoryState.waiting_for_category_name)
 async def add_category_post_answer(message, state: FSMContext):
-    await add_category_post_answer_handler.handle(message)
+    await add_category_after_answer_handler.handle(message)
     await state.finish()
 
 
-@dp.message_handler(commands=['delete_category'])
-async def delete_category(message):
-    await delete_category_handler.handle(message)
+@dp.message_handler(state=EditCategoryState.waiting_for_category_name)
+async def edit_category_name_after_answer(message, state: FSMContext):
+    await edit_category_name_after_answer_handler.handle(message)
+    await state.finish()
 
 
 ######################
@@ -267,12 +257,13 @@ async def on_shutdown(dp):
 
 
 if __name__ == "__main__":
-    executor.start_webhook(
-        dispatcher=dp,
-        webhook_path='/' + config.BOT_API_KEY,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        skip_updates=True,
-        host=config.SERVER_HOST,
-        port=config.SERVER_PORT,
-    )
+    # executor.start_webhook(
+    #     dispatcher=dp,
+    #     webhook_path='/' + config.BOT_API_KEY,
+    #     on_startup=on_startup,
+    #     on_shutdown=on_shutdown,
+    #     skip_updates=True,
+    #     host=config.SERVER_HOST,
+    #     port=config.SERVER_PORT,
+    # )
+    asyncio.run(executor.start_polling(dispatcher=dp))

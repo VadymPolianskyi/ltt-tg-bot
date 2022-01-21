@@ -5,8 +5,17 @@ class CreateCategoryState(StatesGroup):
     waiting_for_category_name = State()
 
 
+class EditCategoryState(StatesGroup):
+    waiting_for_category_name = State()
+
+
 class CreateActivityState(StatesGroup):
     waiting_for_activity_name = State()
+
+
+class EditActivityState(StatesGroup):
+    waiting_for_activity_name = State()
+    waiting_for_category = State()
 
 
 class StatisticWriteTimeRangeState(StatesGroup):
