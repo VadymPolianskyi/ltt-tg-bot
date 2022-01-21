@@ -3,6 +3,7 @@ from typing import Optional
 
 from app.db.dao import ActivityDao, EventDao
 from app.db.entity import EventType, Event
+from app.service import time_service
 
 
 class EventService:
@@ -30,3 +31,16 @@ class EventService:
 
     def delete(self, *event_ids):
         self.dao.delete(*event_ids)
+
+    def finish_and_calculate_time(self, user_id: int, activity_name: str, time: datetime) -> tuple:
+        e_start = self.find_last(user_id, activity_name, EventType.START)
+        e_stop = self.create(
+            user_id=user_id,
+            activity_name=activity_name,
+            event_type=EventType.STOP,
+            time=time,
+            last=e_start.id
+        )
+
+        hours, minutes = time_service.count_difference(e_start.time, e_stop.time)
+        return hours, minutes

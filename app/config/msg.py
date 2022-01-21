@@ -38,6 +38,13 @@ Commands:
 
 /{STATISTICS_COMMAND} - show statistics for the chosen time range
 """
+
+MENU = """
+With me, you will know how really you spend your life.
+📊 Let's analyze your time!
+
+Choose:
+"""
 # /distracted - to write distracted time for your event.sql
 
 

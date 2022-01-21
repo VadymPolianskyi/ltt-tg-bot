@@ -28,6 +28,8 @@ class Dao:
     def _select_list(self, query, parameters) -> list:
         with connection.cursor() as cursor:
             sql_query = query.replace("'", "")
+            print(f"Execute 'select_list' query: {sql_query}")
+            print(f'Parameters: {parameters}')
             cursor.execute(sql_query, parameters)
             print("Successfully selected")
             return cursor.fetchall()
@@ -35,7 +37,10 @@ class Dao:
     def _execute(self, query, parameters):
         with connection.cursor() as cursor:
             sql_query = query.replace("'", "")
+            print(f"Execute query: {sql_query}")
+            print(f'Parameters: {parameters}')
             cursor.execute(sql_query, parameters)
+            print("Successfully executed")
         connection.commit()
 
 
@@ -121,7 +126,7 @@ class ActivityDao(Dao):
 
     def find_last_started(self, user_id: int) -> list:
         query = f"""
-                SELECT DISTINCT a.id, a.name, a.created FROM `{self.__event_table_name}` as e
+                SELECT DISTINCT a.id, a.name, a.user_id, a.created FROM `{self.__event_table_name}` as e
                 JOIN `{self.__activity_table_name}` as a on e.activity_id=a.id
                 WHERE e.user_id=%s AND e.type=%s 
                 AND  e.id NOT IN (SELECT `last` FROM `{self.__event_table_name}` WHERE `user_id`=%s)

@@ -1,5 +1,6 @@
 from app.db.dao import ActivityDao, EventDao
 from app.db.entity import Activity
+from app.service import markup
 
 
 class ActivityService:
@@ -26,6 +27,10 @@ class ActivityService:
     def show_all_titles(self, user_id: int) -> list:
         print(f"Show all titles for user({str(user_id)})")
         return [a.name for a in self.show_all(user_id)]
+
+    def all_activities_keyboard(self, user_id: int, key: str):
+        all_user_activity_titles = self.show_all_titles(user_id)
+        return markup.create_simple_inline_markup(key, all_user_activity_titles)
 
     def all_started_activity_titles(self, user_id: int) -> list:
         print(f"Find last started activities for user({str(user_id)})")
