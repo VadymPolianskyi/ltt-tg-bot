@@ -22,7 +22,8 @@ from app.handler.event.last_event import LastEventsPostAnswerHandler, LastEvents
 from app.handler.menu import MenuHandler, MenuCallbackHandler
 from app.handler.router import CallbackRouter
 from app.handler.start import StartHandler
-from app.handler.statistics.statistics import StatisticsHandler, StatisticsPostAnswerHandler
+from app.handler.statistics.statistics import StatisticsPostAnswerHandler, \
+    StatisticsPostAnswerCallbackHandler, StatisticsCallbackHandler
 from app.handler.track.start_tracking import StartTrackingHandler, StartTrackingAfterVoteCallbackHandler
 from app.handler.track.stop_tracking import StopTrackingAfterVoteCallbackHandler, StopTrackingHandler
 from app.handler.track.track import TrackHandler, TrackAfterChoiseCallbackHandler, TrackAfterTimeAnswerHandler
@@ -70,6 +71,9 @@ callback_router = CallbackRouter([
 
     TrackAfterChoiseCallbackHandler(),
 
+    StatisticsCallbackHandler(),
+    StatisticsPostAnswerCallbackHandler(statistics_service),
+
     StartTrackingAfterVoteCallbackHandler(events),
     StopTrackingAfterVoteCallbackHandler(events),
 
@@ -102,7 +106,6 @@ delete_event_handler = DeleteEventHandler(activities)
 
 # statistics
 statistics_post_answer_handler = StatisticsPostAnswerHandler(statistics_service)
-statistics_handler = StatisticsHandler()
 
 # user
 time_zone_handler = TimeZoneHandler(user_service)
@@ -223,12 +226,6 @@ async def time_zone_after_answer(message):
 #######################
 #       REPORT        #
 #######################
-
-@dp.message_handler(commands=['statistics'])
-async def statistics(message):
-    await statistics_handler.handle(message)
-    await StatisticWriteTimeRangeState.waiting_for_time_range.set()
-
 
 @dp.message_handler(state=StatisticWriteTimeRangeState.waiting_for_time_range)
 async def statistics_post_time_answer(message, state: FSMContext):
