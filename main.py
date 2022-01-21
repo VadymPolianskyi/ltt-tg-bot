@@ -1,11 +1,6 @@
-import asyncio
-import os
-
-import aiogram
 from aiogram import Bot, Dispatcher, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
-from flask import Flask, request
 
 from app.config import config
 from app.handler.activity.activities import ActivitiesHandler
@@ -33,8 +28,6 @@ from app.service.statistics import StatisticsService
 from app.service.user import UserService
 from app.state import CreateActivityState, CreateCategoryState, TrackWriteTimeRangeState, StatisticWriteTimeRangeState, \
     TimeZoneWriteTZNameState, LastEventsWriteCountState
-
-server = Flask(__name__)
 
 bot = Bot(token=config.BOT_API_KEY, parse_mode="Markdown")
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -258,21 +251,28 @@ async def statistics_post_time_answer(message, state: FSMContext):
 ##############################
 
 
-@server.route('/' + config.BOT_API_KEY, methods=['POST'])
-def get_message():
-    json_string = request.get_data().decode('utf-8')
-    update = aiogram.types.Update.as_json(json_string)
-    dp.process_update(update)
-    return "!", 200
+async def on_startup(_):
+    await bot.set_webhook(config.WEBHOOK_URL + '/' + config.BOT_API_KEY)
 
 
-@server.route("/")
-def webhook():
-    dp.reset_webhook()
-    bot.set_webhook(url=config.WEBHOOK_URL + config.BOT_API_KEY)
-    return "!", 200
+async def on_shutdown(dp):
+    print('Shutting down..')
+
+    await bot.delete_webhook()
+
+    await dp.storage.close()
+    await dp.storage.wait_closed()
+
+    print('Bye!')
 
 
 if __name__ == "__main__":
-    asyncio.run(executor.start_polling(dp, skip_updates=True))
-    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+    executor.start_webhook(
+        dispatcher=dp,
+        webhook_path='/' + config.BOT_API_KEY,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=True,
+        host=config.SERVER_HOST,
+        port=config.SERVER_PORT,
+    )

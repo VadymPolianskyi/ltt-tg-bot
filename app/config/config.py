@@ -1,5 +1,8 @@
 import os
 
+SERVER_HOST = os.environ.get('HOST', "0.0.0.0")
+SERVER_PORT = int(os.environ.get('PORT', 5000))
+
 BOT_API_KEY = os.getenv("BOT_API_KEY")
 
 DB_HOST = os.getenv("DB_HOST")
