@@ -252,7 +252,7 @@ async def statistics_post_time_answer(message, state: FSMContext):
 
 
 async def on_startup(_):
-    await bot.set_webhook(config.WEBHOOK_URL + '/' + config.BOT_API_KEY)
+    await bot.set_webhook(config.WEBHOOK_URL + config.BOT_API_KEY)
 
 
 async def on_shutdown(dp):
