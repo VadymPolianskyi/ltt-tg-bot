@@ -7,20 +7,20 @@ from app.service.category import CategoryService
 from app.service.markup import EMPTY_VOTE_RESULT
 
 
-class DeleteCategoryCallbackHandler(TelegramCallbackHandler):
+class DeleteCategoryCallbackHandler(TelegramCallbackHandler, GeneralCategoryHandler):
     MARKER = marker.DELETE_CATEGORY
 
-    def __init__(self, categories: CategoryService, activities: ActivityService):
-        super().__init__()
-        self.categories = categories
-        self.activities = activities
+    def __init__(self, category_service: CategoryService, activity_service: ActivityService):
+        TelegramCallbackHandler.__init__(self)
+        GeneralCategoryHandler.__init__(self, category_service)
+        self.activity_service = activity_service
 
     async def handle_(self, callback: CallbackMeta):
         category_id = callback.payload[self.MARKER]
 
-        category = self.categories.find(category_id)
+        category = self.category_service.find(category_id)
 
-        is_empty = len(self.activities.all(category_id)) == 0
+        is_empty = len(self.activity_service.all(category_id)) == 0
 
         if is_empty:
             vote_keyboard = markup.create_voter_inline_markup(self.MARKER, category_id)
@@ -31,6 +31,7 @@ class DeleteCategoryCallbackHandler(TelegramCallbackHandler):
             )
         else:
             await callback.original.answer(text=msg.DELETE_CATEGORY_REGECT.format(category.name))
+            await self._show_categories_menu(callback.original.message, callback.user_id)
 
 
 class DeleteCategoryAfterVoteCallbackHandler(TelegramCallbackHandler, GeneralCategoryHandler):
