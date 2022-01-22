@@ -107,7 +107,7 @@ statistics_post_answer_handler = StatisticsPostAnswerHandler(statistics_service,
 change_time_zone_handler = ChangeTimeZoneHandler(user_service)
 
 
-@dp.message_handler(commands=['menu'])
+@dp.message_handler(commands=['start', 'menu'])
 async def menu(message):
     await menu_handler.handle(message)
 
