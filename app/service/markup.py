@@ -1,4 +1,4 @@
-from aiogram import types
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.config import msg
 
@@ -16,14 +16,22 @@ def create_simple_inline_markup(key, button_names: list):
 
 
 def create_inline_markup(key, button_name_value_tuples: list):
-    activities_keyboard = types.InlineKeyboardMarkup()
+    button_name_key_value_tuples = [(e[0], key, e[1]) for e in button_name_value_tuples]
 
-    for element in button_name_value_tuples:
-        b_name = element[0]
-        b_value = element[1]
-        activities_keyboard.add(types.InlineKeyboardButton(
-            text=b_name,
-            callback_data='{"' + key + '": "' + b_value + '"}')
-        )
+    return create_inline_markup_(button_name_key_value_tuples)
 
-    return activities_keyboard
+
+def create_inline_markup_(button_name_key_value_tuples: list, buttons_in_line=2):
+    keyboard = list()
+    line = list()
+    for element in button_name_key_value_tuples:
+        b_name, b_key, b_value = element
+
+        if len(line) >= buttons_in_line:
+            keyboard.append(line.copy())
+            line.clear()
+
+        line.append(InlineKeyboardButton(text=b_name, callback_data='{"' + b_key + '": "' + b_value + '"}'))
+
+    keyboard.append(line)
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
