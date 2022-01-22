@@ -33,6 +33,14 @@ class CategoryService:
         print(f"Find Category({category_id})")
         return self.dao.find(category_id)
 
+    def create_all_categories_markup(self, marker: str, user_id: int, back_button_marker: str):
+        print(f"Create all categories markup for User({user_id})")
+
+        buttons = [(msg.CATEGORY_SIGN + ' ' + c.name, marker, c.id) for c in self.all(user_id)]
+        buttons.append((msg.BACK_BUTTON, back_button_marker, '_'))
+
+        return markup.create_inline_markup_(buttons)
+
     def categories_markup(self, user_id: int) -> InlineKeyboardMarkup:
         print(f"Create categories markup for User({user_id})")
         buttons = [(msg.CATEGORY_SIGN + ' ' + c.name, marker.CATEGORY, c.id) for c in self.all(user_id)]

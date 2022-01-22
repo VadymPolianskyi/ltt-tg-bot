@@ -22,11 +22,13 @@ from app.handler.event.last_event import LastEventsPostAnswerHandler, LastEvents
 from app.handler.menu import MenuHandler, MenuCallbackHandler
 from app.handler.router import CallbackRouter
 from app.handler.start import StartHandler
-from app.handler.statistics.statistics import StatisticsPostAnswerHandler, \
-    StatisticsPostAnswerCallbackHandler, StatisticsCallbackHandler
-from app.handler.track.start_tracking import StartTrackingHandler, StartTrackingAfterVoteCallbackHandler
-from app.handler.track.stop_tracking import StopTrackingAfterVoteCallbackHandler, StopTrackingHandler
-from app.handler.track.track import TrackHandler, TrackAfterChoiseCallbackHandler, TrackAfterTimeAnswerHandler
+from app.handler.statistics.statistics import StatisticsPostAnswerHandler, StatisticsPostAnswerCallbackHandler, \
+    StatisticsCallbackHandler
+from app.handler.track.start_tracking import StartTrackingCallbackHandler, StartTrackingAfterCategoryCallbackHandler, \
+    StartTrackingAfterActivityCallbackHandler
+from app.handler.track.stop_tracking import StopTrackingAfterVoteCallbackHandler, StopTrackingCallbackHandler
+from app.handler.track.track import TrackAfterTimeAnswerHandler, TrackCallbackHandler, \
+    TrackAfterCategoryCallbackHandler, TrackAfterActivityCallbackHandler
 from app.handler.user.time_zone import TimeZoneHandler, ChangeTimeZoneCallbackHandler, ChangeTimeZoneHandler
 from app.service.activity import ActivityService
 from app.service.category import CategoryService
@@ -44,9 +46,6 @@ activities = ActivityService()
 events = EventService()
 user_service = UserService()
 statistics_service = StatisticsService()
-
-track_after_time_answer_handler = TrackAfterTimeAnswerHandler(events)
-change_time_zone_handler = ChangeTimeZoneHandler(user_service)
 
 #### CALLBACK ####
 
@@ -69,13 +68,19 @@ callback_router = CallbackRouter([
     DeleteActivityCallbackHandler(activities),
     DeleteActivityAfterVoteCallbackHandler(activities, categories),
 
-    TrackAfterChoiseCallbackHandler(),
-
     StatisticsCallbackHandler(),
     StatisticsPostAnswerCallbackHandler(statistics_service),
 
-    StartTrackingAfterVoteCallbackHandler(events),
-    StopTrackingAfterVoteCallbackHandler(events),
+    StartTrackingCallbackHandler(categories),
+    StartTrackingAfterCategoryCallbackHandler(activities),
+    StartTrackingAfterActivityCallbackHandler(events),
+
+    StopTrackingCallbackHandler(activities, events),
+    StopTrackingAfterVoteCallbackHandler(activities, events),
+
+    TrackCallbackHandler(categories),
+    TrackAfterCategoryCallbackHandler(activities),
+    TrackAfterActivityCallbackHandler(activities),
 
     DeleteEventBeforeEventsVoteCallbackHandler(statistics_service),
     DeleteEventBeforeVoteCallbackHandler(statistics_service),
@@ -97,9 +102,9 @@ add_activity_post_answer_handler = AddActivityPostAnswerHandler(activities)
 edit_activity_name_after_answer_handler = EditActivityNameAfterAnswerHandler(activities)
 
 # track
-track_handler = TrackHandler(activities)
-start_tracking_handler = StartTrackingHandler(activities)
-stop_tracking_handler = StopTrackingHandler(activities, events)
+track_after_time_answer_handler = TrackAfterTimeAnswerHandler(activities, events)
+
+# event
 last_events_post_answer_handler = LastEventsPostAnswerHandler(activities, statistics_service)
 last_events_handler = LastEventsHandler(activities)
 delete_event_handler = DeleteEventHandler(activities)
@@ -108,6 +113,7 @@ delete_event_handler = DeleteEventHandler(activities)
 statistics_post_answer_handler = StatisticsPostAnswerHandler(statistics_service)
 
 # user
+change_time_zone_handler = ChangeTimeZoneHandler(user_service)
 time_zone_handler = TimeZoneHandler(user_service)
 
 
@@ -167,25 +173,10 @@ async def edit_category_name_after_answer(message, state: FSMContext):
 #       TRACK        #
 ######################
 
-@dp.message_handler(commands=['track'])
-async def track(message):
-    await track_handler.handle(message)
-
-
 @dp.message_handler(state=TrackWriteTimeRangeState.waiting_for_time_range)
 async def track_(message, state: FSMContext):
     await track_after_time_answer_handler.handle(message)
     await state.finish()
-
-
-@dp.message_handler(commands=['start_tracking'])
-async def start_tracking(message):
-    await start_tracking_handler.handle(message)
-
-
-@dp.message_handler(commands=['stop_tracking'])
-async def start_tracking(message):
-    await stop_tracking_handler.handle(message)
 
 
 ######################

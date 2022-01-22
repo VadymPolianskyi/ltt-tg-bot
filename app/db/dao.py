@@ -131,7 +131,7 @@ class ActivityDao(Dao):
 
     def find_last_started(self, user_id: int) -> list:
         query = f"""
-                SELECT DISTINCT a.id, a.name, a.user_id, a.created FROM `{self.__event_table_name}` as e
+                SELECT DISTINCT a.id, a.name, a.user_id, a.category_id, a.created FROM `{self.__event_table_name}` as e
                 JOIN `{self.__activity_table_name}` as a on e.activity_id=a.id
                 WHERE e.user_id=%s AND e.type=%s 
                 AND  e.id NOT IN (SELECT `last` FROM `{self.__event_table_name}` WHERE `user_id`=%s)
@@ -162,16 +162,15 @@ class EventDao(Dao):
 
         return Event.from_dict(r) if r else None
 
-    def find_last_event_for_activity(self, user_id: int, activity_name: str, event_type: EventType) -> Optional[Event]:
+    def find_last_event_for_activity(self, activity_id: str, event_type: EventType) -> Optional[Event]:
         query = f"""
-        SELECT * FROM `{self.__event_table_name}` as e
-                JOIN `{self.__activity_table_name}` as a ON e.activity_id=a.id
-                WHERE a.name=%s AND e.user_id=%s AND e.type=%s
-                AND e.id NOT IN (SELECT `last` FROM `{self.__event_table_name}` WHERE `user_id`=%s)
-                ORDER BY e.time DESC
+        SELECT * FROM `{self.__event_table_name}`
+                WHERE activity_id=%s AND type=%s
+                AND id NOT IN (SELECT `last` FROM `{self.__event_table_name}` WHERE `activity_id`=%s)
+                ORDER BY time DESC
                 LIMIT 1
         """
-        r = self._select_one(query, (activity_name, user_id, event_type.name, user_id))
+        r = self._select_one(query, (activity_id, event_type.name, activity_id))
         return Event.from_dict(r) if r else None
 
     def delete_all_for_activity(self, activity_id: str):

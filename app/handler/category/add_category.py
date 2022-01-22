@@ -1,5 +1,5 @@
 from app.config import msg, marker
-from app.handler.category.category import CategoryCallbackHandler, GeneralCategoryHandler
+from app.handler.category.category import GeneralCategoryHandler
 from app.handler.general import TelegramMessageHandler, MessageMeta, TelegramCallbackHandler, CallbackMeta
 from app.service.category import CategoryService
 from app.state import CreateCategoryState

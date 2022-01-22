@@ -65,7 +65,6 @@ TRACK_BUTTON = '⏱ Track'
 
 STATISTICS_BUTTON = '📊 Statistics'
 
-
 BACK_BUTTON = '🔙 Back'
 
 # universal
@@ -113,21 +112,23 @@ DELETE_ACTIVITY_4_1 = "❌ Deletion is canceled."
 
 # /track
 
-TRACK_1 = CHOOSE_ACTIVITY
-TRACK_2 = """`{}` 🕔 How long? \nExamples: `1h20m`, `10m`, `3h`"""
+TRACK_1 = CHOOSE_CATEGORY
+TRACK_2 = CHOOSE_ACTIVITY
+TRACK_3 = """`{}` 🕔 How long? \nExamples: `1h20m`, `10m`, `3h`"""
 FINISHED_TRACKING = """✅ Tracked `{}`. Totally spent {} hours {} minutes. Good Job 👍"""
 
 # /start_tracking
 
-START_TRACKING_1 = CHOOSE_ACTIVITY
-START_TRACKING_2 = "Started ✔️️ Please, don't forget to send /" + STOP_COMMAND + " after you finish the `{}`. Have fun!"
+START_TRACKING_1 = CHOOSE_CATEGORY
+START_TRACKING_2 = CHOOSE_ACTIVITY
+START_TRACKING_3 = "Started ✔️️"
 
 # /stop_tracking
 
 STOP_TRACKING_1 = FINISHED_TRACKING
 STOP_TRACKING_2_1 = CHOOSE_ACTIVITY
 STOP_TRACKING_2_2 = FINISHED_TRACKING
-STOP_TRACKING_3_1 = f""" Oh, I can't stop nothing 🤷‍. Please start 🆕 activity by /{START_COMMAND}, or track already finished 🏁 activity with /{TRACK_COMMAND} command."""
+STOP_TRACKING_3_1 = f"Oh, I can't stop nothing 🤷‍. Please start 🆕 activity."
 
 # /last_events
 

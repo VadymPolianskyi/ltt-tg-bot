@@ -34,11 +34,11 @@ class ActivityService:
         all_user_activity_titles = self.show_all_titles(user_id)
         return markup.create_simple_inline_markup(key, all_user_activity_titles)
 
-    def all_started_activity_titles(self, user_id: int) -> list:
-        print(f"Find last started activities for user({str(user_id)})")
+    def all_started_activities(self, user_id: int) -> list:
+        print(f"Find all started activities for user({str(user_id)})")
         started_activities = self.dao.find_last_started(user_id)
         print(f'Found {len(started_activities)} started activities for user({str(user_id)})')
-        return [a.name for a in started_activities]
+        return started_activities
 
     def find(self, activity_id: str) -> Activity:
         print(f"Find Activity({activity_id})")
@@ -53,6 +53,12 @@ class ActivityService:
     def update(self, activity: Activity):
         print(f"Update Activity({activity.id}) for User({activity.user_id})")
         self.dao.update(activity)
+
+    def create_all_activities_markup(self, marker: str, category_id: str, back_button_marker: str):
+        buttons = [(a.name, marker, a.id) for a in
+                   self.find_all(category_id)]
+        buttons.append((msg.BACK_BUTTON, back_button_marker, '_'))
+        return markup.create_inline_markup_(buttons)
 
     def create_settings_markup(self, activity_id: str, category_id: str):
         print(f"Create settings markup for Activity({activity_id}) from Category({category_id})")

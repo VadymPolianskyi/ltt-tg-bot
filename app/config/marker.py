@@ -17,5 +17,5 @@ STATISTICS = 'sttst'
 
 TRACK = 'trk'
 
-START_TRACKING = 'str'
-STOP_TRACKING = 'stp'
+START_TRACKING = 'sttr'
+STOP_TRACKING = 'stptr'

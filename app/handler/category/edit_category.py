@@ -39,5 +39,4 @@ class EditCategoryNameAfterAnswerHandler(TelegramMessageHandler, GeneralCategory
         self.category_service.update(category)
 
         await message.original.answer(msg.EDIT_CATEGORY_NAME_DONE.format(old_name, new_name))
-
         await self._show_category_menu(message.original, category)
