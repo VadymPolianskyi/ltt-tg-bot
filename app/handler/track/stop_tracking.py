@@ -1,43 +1,49 @@
-from app.config import msg
-from app.handler.general import TelegramMessageHandler, TelegramCallbackHandler, MessageMeta, CallbackMeta
+import time
+
+from app.config import msg, marker
+from app.handler.general import TelegramCallbackHandler, CallbackMeta
+from app.handler.menu import MenuGeneral
 from app.service import markup
 from app.service.activity import ActivityService
 from app.service.event import EventService
 
 
-class StopTrackingHandler(TelegramMessageHandler):
-    def __init__(self, activities: ActivityService, events: EventService):
-        super().__init__()
-        self.activities = activities
-        self.events = events
+class StopTrackingCallbackHandler(TelegramCallbackHandler, MenuGeneral):
+    MARKER = marker.STOP_TRACKING
 
-    async def handle_(self, message: MessageMeta, *args):
-        started_activities = self.activities.all_started_activity_titles(message.user_id)
-
-        if len(started_activities) == 1:
-            activity = started_activities[0]
-            hours, minutes = self.events.finish_and_calculate_time(message.user_id, activity, message.time)
-            await message.original.answer(msg.STOP_TRACKING_2_2.format(activity, hours, minutes))
-
-        elif len(started_activities) > 1:
-            started_activities_keyboard = markup.create_simple_inline_markup(
-                StopTrackingAfterVoteCallbackHandler.MARKER,
-                started_activities
-            )
-            await message.original.answer(msg.STOP_TRACKING_2_1, reply_markup=started_activities_keyboard)
-        else:
-            await message.original.answer(msg.STOP_TRACKING_3_1)
-
-
-class StopTrackingAfterVoteCallbackHandler(TelegramCallbackHandler):
-    MARKER = 's_t'
-
-    def __init__(self, events: EventService):
-        super().__init__()
-        self.events = events
+    def __init__(self, activity_service: ActivityService, event_service: EventService):
+        TelegramCallbackHandler.__init__(self)
+        MenuGeneral.__init__(self, activity_service)
+        self.event_service = event_service
 
     async def handle_(self, callback: CallbackMeta):
-        activity = callback.payload[StopTrackingAfterVoteCallbackHandler.MARKER]
+        started_activities = self.activity_service.all_started_activities(callback.user_id)
 
-        hours, minutes = self.events.finish_and_calculate_time(callback.user_id, activity, callback.time)
-        await callback.original.message.answer(msg.STOP_TRACKING_2_2.format(activity, hours, minutes))
+        if len(started_activities) == 1:
+            callback.payload = {StopTrackingAfterVoteCallbackHandler.MARKER: started_activities[0].id}
+            await StopTrackingAfterVoteCallbackHandler(self.activity_service, self.event_service).handle_(callback)
+        elif len(started_activities) > 1:
+            buttons = [(a.name, StopTrackingAfterVoteCallbackHandler.MARKER, a.id) for a in started_activities]
+            buttons.append((msg.BACK_BUTTON, marker.MENU, '_'))
+            started_activities_keyboard = markup.create_inline_markup_(buttons)
+            await callback.original.message.answer(msg.STOP_TRACKING_ACTIVITY, reply_markup=started_activities_keyboard)
+        else:
+            await callback.original.message.answer(msg.STOP_TRACKING_NOTHING)
+            await self._show_menu(callback.original.message, callback.user_id)
+
+
+class StopTrackingAfterVoteCallbackHandler(TelegramCallbackHandler, MenuGeneral):
+    MARKER = 'stpa'
+
+    def __init__(self, activity_service: ActivityService, event_service: EventService):
+        TelegramCallbackHandler.__init__(self)
+        MenuGeneral.__init__(self, activity_service)
+        self.event_service = event_service
+
+    async def handle_(self, callback: CallbackMeta):
+        activity = self.activity_service.find(callback.payload[self.MARKER])
+
+        hours, minutes = self.event_service.finish_and_calculate_time(callback.user_id, activity.id, callback.time)
+        await callback.original.message.answer(msg.STOP_TRACKING_DONE.format(activity.name, hours, minutes))
+        time.sleep(1)
+        await self._show_menu(callback.original.message, callback.user_id)

@@ -1,41 +1,64 @@
-from app.config import msg
+from app.config import msg, marker
 from app.db.entity import EventType
-from app.handler.general import TelegramMessageHandler, TelegramCallbackHandler, MessageMeta, CallbackMeta
-from app.service import markup
+from app.handler.general import TelegramCallbackHandler, CallbackMeta
+from app.handler.menu import MenuGeneral
 from app.service.activity import ActivityService
+from app.service.category import CategoryService
 from app.service.event import EventService
 
 
-class StartTrackingHandler(TelegramMessageHandler):
-    def __init__(self, activities: ActivityService):
+class StartTrackingCallbackHandler(TelegramCallbackHandler):
+    MARKER = marker.START_TRACKING
+
+    def __init__(self, category_service: CategoryService):
         super().__init__()
-        self.activities = activities
-
-    async def handle_(self, message: MessageMeta, *args):
-        started_titles = self.activities.all_started_activity_titles(message.user_id)
-        all_user_activity_titles = [a for a in self.activities.show_all_titles(message.user_id) if
-                                    a not in started_titles]
-
-        activities_keyboard = markup.create_simple_inline_markup(StartTrackingAfterVoteCallbackHandler.MARKER,
-                                                                 all_user_activity_titles)
-
-        await message.original.answer(msg.START_TRACKING_1, reply_markup=activities_keyboard)
-
-
-class StartTrackingAfterVoteCallbackHandler(TelegramCallbackHandler):
-    MARKER = 'start_tracking'
-
-    def __init__(self, events: EventService):
-        super().__init__()
-        self.events = events
+        self.category_service = category_service
 
     async def handle_(self, callback: CallbackMeta):
-        activity_name = callback.payload[self.MARKER]
-
-        self.events.create(
+        categories_keyboard = self.category_service.create_all_categories_markup(
+            marker=StartTrackingAfterCategoryCallbackHandler.MARKER,
             user_id=callback.user_id,
-            activity_name=activity_name,
+            back_button_marker=marker.MENU
+        )
+
+        await callback.original.message.answer(msg.START_TRACKING_CATEGORY, reply_markup=categories_keyboard)
+
+
+class StartTrackingAfterCategoryCallbackHandler(TelegramCallbackHandler):
+    MARKER = 'strac'
+
+    def __init__(self, activity_service: ActivityService):
+        super().__init__()
+        self.activity_service = activity_service
+
+    async def handle_(self, callback: CallbackMeta):
+        category_id = callback.payload[self.MARKER]
+
+        activities_keyboard = self.activity_service.create_all_activities_markup(
+            marker=StartTrackingAfterActivityCallbackHandler.MARKER,
+            category_id=category_id,
+            back_button_marker=marker.START_TRACKING
+        )
+
+        await callback.original.message.answer(msg.START_TRACKING_ACTIVITY, reply_markup=activities_keyboard)
+
+
+class StartTrackingAfterActivityCallbackHandler(TelegramCallbackHandler, MenuGeneral):
+    MARKER = 'straa'
+
+    def __init__(self, event_service: EventService, activity_service: ActivityService):
+        TelegramCallbackHandler.__init__(self)
+        MenuGeneral.__init__(self, activity_service)
+        self.event_service = event_service
+
+    async def handle_(self, callback: CallbackMeta):
+        activity_id = callback.payload[self.MARKER]
+
+        self.event_service.create(
+            user_id=callback.user_id,
+            activity_id=activity_id,
             event_type=EventType.START,
             time=callback.time
         )
-        await callback.original.message.answer(msg.START_TRACKING_2.format(activity_name))
+        await callback.original.answer(msg.START_TRACKING_DONE)
+        await self._show_menu(callback.original.message, callback.user_id)

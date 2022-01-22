@@ -87,7 +87,7 @@ class FullStatistics:
     def to_str(self):
         printed_activities_statistic: str = '\n'.join([f.to_str() for f in self.fully()])
         date_str = self.__from_d if self.__from_d == self.__until_d else f'{self.__from_d} - {self.__until_d}'
-        return msg.STATISTIC_2.format(date_str, printed_activities_statistic)
+        return msg.STATISTIC_RESULT.format(date_str, printed_activities_statistic)
 
     def fully(self) -> list:
         grouped_by_activity = dict()
@@ -146,16 +146,10 @@ class StatisticsService:
 
         return FullStatistics(activity_statistic=activity_statistic, from_d=from_d, until_d=until_d)
 
-    def statistics_with_event_id(self, user_id: int, activity_name: str, after_event_id: str = None,
+    def statistics_with_event_id(self, user_id: int, activity_id: str, after_event_id: str = None,
                                  limit: int = 20) -> list:
 
-        if after_event_id:
-            after_event = self.event_dao.find(after_event_id)
-            to_date = after_event.time
-            activity_id = after_event.activity_id
-        else:
-            to_date = time_service.now()
-            activity_id = self.activity_dao.find_by_user_id_and_name(user_id, activity_name).id
+        to_date = self.event_dao.find(after_event_id).time if after_event_id else time_service.now()
 
         events_statistics: list = StatisticsSelector(user_id) \
             .activity_id(activity_id) \
@@ -164,17 +158,13 @@ class StatisticsService:
             .order_from_newest() \
             .select()
 
-        statistics_with_id = list()
-        for es in events_statistics:
-            element = (es.stop_event_id, ActivityStatistics.from_statistic(es))
-            statistics_with_id.append(element)
+        return [(es.stop_event_id, ActivityStatistics.from_statistic(es)) for es in events_statistics]
 
-        return statistics_with_id
-
-    def last_events_statistics(self, user_id: int, limit: int = 20) -> list:
+    def last_events_statistics(self, user_id: int, activity_id: str, limit: int = 20) -> list:
         print(f"Find last {limit} events for user({str(user_id)})")
 
         last_events_statistics = StatisticsSelector(user_id) \
+            .activity_id(activity_id) \
             .limit(limit) \
             .order_from_newest() \
             .select()
