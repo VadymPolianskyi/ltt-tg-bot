@@ -13,7 +13,8 @@ class MenuGeneral:
             (msg.STATISTICS_BUTTON, marker.STATISTICS, '_'),
             (msg.START_TRACKING_BUTTON, marker.START_TRACKING, '_'),
             (msg.STOP_TRACKING_BUTTON, marker.STOP_TRACKING, '_'),
-            (msg.TRACK_BUTTON, marker.TRACK, '_')
+            (msg.TRACK_BUTTON, marker.TRACK, '_'),
+            (msg.SETTINGS_BUTTON, marker.TIME_ZONE, '_')
         ])
         await original_message.answer(msg.MENU, reply_markup=category_settings_menu_keyboard)
 

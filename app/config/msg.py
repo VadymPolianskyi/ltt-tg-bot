@@ -54,7 +54,7 @@ CATEGORIES_BUTTON = '📂 Categories'
 ADD_CATEGORY_BUTTON = "➕ Add Category"
 ADD_ACTIVITY_BUTTON = "➕ Add Activity"
 
-SETTINGS_CATEGORY_BUTTON = "⚙️ Settings"
+SETTINGS_BUTTON = "⚙️ Settings"
 EDIT_NAME_BUTTON = "✏️ Edit name"
 DELETE_BUTTON = "🗑️ Delete"
 CHANGE_CATEGORY_BUTTON = "📂 Change Category"
@@ -64,6 +64,8 @@ STOP_TRACKING_BUTTON = '⏹ Stop Tracking'
 TRACK_BUTTON = '⏱ Track'
 
 STATISTICS_BUTTON = '📊 Statistics'
+
+CHANGE_TIME_ZONE_BUTTON = '🌎 Change Time Zone'
 
 BACK_BUTTON = '🔙 Back'
 
@@ -152,7 +154,7 @@ TIMEZONE_BUTTON = "🌎 Change Time Zone"
 
 TIMEZONE_1 = "🕐 Your current Time Zone is `{}`. ⌚️ Your current time is `{}`"
 TIMEZONE_2 = "🌏 Please write your Time Zone in the format `Continent/City`. (MAKE SURE that you've finished all your events before changing Time Zone) \nP.S. 🙋 this [site](http://www.timezoneconverter.com/cgi-bin/findzone.tzc) can help you to find your time zone."
-TIMEZONE_3 = "✅ Your Time Zone is changed on `{}`. ⌚️ Your current time is `{}`"
+TIMEZONE_3 = "✅ Time Zone is changed on `{}`"
 
 # /statistics
 

@@ -54,7 +54,7 @@ class CategoryService:
 
         buttons = list()
         buttons += [(a.name, marker.ACTIVITY_SETTINGS, a.id) for a in activities]
-        buttons.append((msg.SETTINGS_CATEGORY_BUTTON, marker.CATEGORY_SETTINGS, category_id))
+        buttons.append((msg.SETTINGS_BUTTON, marker.CATEGORY_SETTINGS, category_id))
         buttons.append((msg.ADD_ACTIVITY_BUTTON, marker.ADD_ACTIVITY, category_id))
         buttons.append((msg.BACK_BUTTON, marker.CATEGORIES, "_"))
 

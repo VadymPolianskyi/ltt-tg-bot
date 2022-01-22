@@ -29,7 +29,7 @@ from app.handler.track.start_tracking import StartTrackingCallbackHandler, Start
 from app.handler.track.stop_tracking import StopTrackingAfterVoteCallbackHandler, StopTrackingCallbackHandler
 from app.handler.track.track import TrackAfterTimeAnswerHandler, TrackCallbackHandler, \
     TrackAfterCategoryCallbackHandler, TrackAfterActivityCallbackHandler
-from app.handler.user.time_zone import TimeZoneHandler, ChangeTimeZoneCallbackHandler, ChangeTimeZoneHandler
+from app.handler.user.time_zone import ChangeTimeZoneHandler, TimeZoneCallbackHandler, TimeZoneWriteCallbackHandler
 from app.service.activity import ActivityService
 from app.service.category import CategoryService
 from app.service.event import EventService
@@ -86,7 +86,8 @@ callback_router = CallbackRouter([
     DeleteEventBeforeVoteCallbackHandler(statistics_service),
     DeleteEventAfterVoteCallbackHandler(events),
 
-    ChangeTimeZoneCallbackHandler()
+    TimeZoneCallbackHandler(user_service),
+    TimeZoneWriteCallbackHandler()
 ])
 
 #### HANDLERS ####
@@ -114,7 +115,6 @@ statistics_post_answer_handler = StatisticsPostAnswerHandler(statistics_service)
 
 # user
 change_time_zone_handler = ChangeTimeZoneHandler(user_service)
-time_zone_handler = TimeZoneHandler(user_service)
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -202,11 +202,6 @@ async def delete_event(message):
 #####################
 #       USER        #
 #####################
-
-
-@dp.message_handler(commands=['time_zone'])
-async def time_zone(message):
-    await time_zone_handler.handle(message)
 
 
 @dp.message_handler(state=TimeZoneWriteTZNameState.waiting_for_time_zone_name)
