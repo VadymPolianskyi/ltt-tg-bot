@@ -63,7 +63,7 @@ class TelegramCallbackHandler:
 
         try:
             time_zone: str = self.user_service.get_time_zone(user_id)
-            callback_time: datetime = time_service.to_tz(call.message.date, time_zone)
+            callback_time: datetime = time_service.now(time_zone)
 
             print(f"Callback with data '{call.data}' in chat({user_id}) at '{callback_time}'")
             await call.bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
