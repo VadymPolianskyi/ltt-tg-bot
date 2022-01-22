@@ -1,147 +1,167 @@
-import os
-
-import telebot
-from flask import Flask, request
+from aiogram import Bot, Dispatcher, executor
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher import FSMContext
 
 from app.config import config
-from app.handler.activity.activities import ActivitiesHandler
-from app.handler.activity.add_activity import AddActivityHandler, AddActivityPostAnswerHandler
-from app.handler.activity.delete_activity import DeleteActivityHandler, DeleteActivityBeforeVoteCallbackHandler, \
-    DeleteActivityAfterVoteCallbackHandler
-from app.handler.event.delete_event import DeleteEventHandler, DeleteEventBeforeEventsVoteCallbackHandler, \
-    DeleteEventBeforeVoteCallbackHandler, DeleteEventAfterVoteCallbackHandler
-from app.handler.event.last_event import LastEventsPostAnswerHandler, LastEventsHandler
+from app.handler.activity.add_activity import AddActivityCallbackHandler, AddActivityPostAnswerHandler
+from app.handler.activity.delete_activity import DeleteActivityAfterVoteCallbackHandler, DeleteActivityCallbackHandler
+from app.handler.activity.edit_activity import EditActivityNameCallbackHandler, EditActivityNameAfterAnswerHandler, \
+    EditActivityCategoryCallbackHandler, EditActivityCategoryAfterAnswerCallbackHandler
+from app.handler.activity.settings_activity import SettingsActivityCallbackHandler
+from app.handler.category.add_category import AddCategoryAfterAnswerHandler, AddCategoryCallbackHandler
+from app.handler.category.category import CategoriesCallbackHandler, CategoryCallbackHandler
+from app.handler.category.delete_category import DeleteCategoryCallbackHandler, \
+    DeleteCategoryAfterVoteCallbackHandler
+from app.handler.category.edit_category import EditCategoryNameAfterAnswerHandler, EditCategoryNameCallbackHandler
+from app.handler.category.settings_category import SettingsCategoryCallbackHandler
+from app.handler.event.events import ListEventsCallbackHandler, DeleteEventBeforeVoteCallbackHandler, \
+    DeleteEventAfterVoteCallbackHandler
+from app.handler.menu import MenuHandler, MenuCallbackHandler
 from app.handler.router import CallbackRouter
-from app.handler.start import StartHandler
-from app.handler.statistics.statistics import StatisticsHandler, StatisticsPostAnswerHandler
-from app.handler.track.start_tracking import StartTrackingHandler, StartTrackingAfterVoteCallbackHandler
-from app.handler.track.stop_tracking import StopTrackingAfterVoteCallbackHandler, StopTrackingHandler
-from app.handler.track.track import TrackHandler, TrackAfterVoteCallbackHandler, TrackPostTimeAnswerHandler
-from app.handler.user.time_zone import TimeZoneHandler, ChangeTimeZoneCallbackHandler, ChangeTimeZoneHandler
+from app.handler.statistics.statistics import StatisticsPostAnswerHandler, StatisticsPostAnswerCallbackHandler, \
+    StatisticsCallbackHandler
+from app.handler.track.start_tracking import StartTrackingCallbackHandler, StartTrackingAfterCategoryCallbackHandler, \
+    StartTrackingAfterActivityCallbackHandler
+from app.handler.track.stop_tracking import StopTrackingAfterVoteCallbackHandler, StopTrackingCallbackHandler
+from app.handler.track.track import TrackAfterTimeAnswerHandler, TrackCallbackHandler, \
+    TrackAfterCategoryCallbackHandler, TrackAfterActivityCallbackHandler
+from app.handler.user.time_zone import ChangeTimeZoneHandler, TimeZoneCallbackHandler, TimeZoneWriteCallbackHandler
 from app.service.activity import ActivityService
+from app.service.category import CategoryService
 from app.service.event import EventService
 from app.service.statistics import StatisticsService
 from app.service.user import UserService
+from app.state import CreateActivityState, CreateCategoryState, TrackWriteTimeRangeState, StatisticWriteTimeRangeState, \
+    TimeZoneWriteTZNameState, EditCategoryState, EditActivityState
 
-server = Flask(__name__)
-bot = telebot.TeleBot(config.BOT_API_KEY, parse_mode="MARKDOWN")
+bot = Bot(token=config.BOT_API_KEY, parse_mode="Markdown")
+dp = Dispatcher(bot, storage=MemoryStorage())
 
-activities = ActivityService()
-events = EventService()
+category_service = CategoryService()
+activity_service = ActivityService()
+event_service = EventService()
 user_service = UserService()
 statistics_service = StatisticsService()
 
 #### CALLBACK ####
-delete_activity_before_vote_callback_handler = DeleteActivityBeforeVoteCallbackHandler(bot)
-delete_activity_after_vote_callback_handler = DeleteActivityAfterVoteCallbackHandler(bot, activities)
-
-track_post_time_answer_handler = TrackPostTimeAnswerHandler(bot, events)
-track_after_vote_callback_handler = TrackAfterVoteCallbackHandler(bot, track_post_time_answer_handler)
-
-start_tracking_after_vote_callback_handler = StartTrackingAfterVoteCallbackHandler(bot, events)
-stop_tracking_after_vote_callback_handler = StopTrackingAfterVoteCallbackHandler(bot, events)
-
-delete_event_before_events_vote_callback_handler = DeleteEventBeforeEventsVoteCallbackHandler(bot, statistics_service)
-delete_event_before_vote_callback_handler = DeleteEventBeforeVoteCallbackHandler(bot, statistics_service)
-delete_event_after_vote_callback_handler = DeleteEventAfterVoteCallbackHandler(bot, events)
-
-change_time_zone_handler = ChangeTimeZoneHandler(bot, user_service)
-change_time_zone_callback_handler = ChangeTimeZoneCallbackHandler(bot, change_time_zone_handler)
 
 callback_router = CallbackRouter([
-    delete_activity_before_vote_callback_handler,
-    delete_activity_after_vote_callback_handler,
-    track_after_vote_callback_handler,
-    start_tracking_after_vote_callback_handler,
-    stop_tracking_after_vote_callback_handler,
-    delete_event_before_events_vote_callback_handler,
-    delete_event_before_vote_callback_handler,
-    delete_event_after_vote_callback_handler,
-    change_time_zone_callback_handler
-]
-)
+    MenuCallbackHandler(activity_service),
+
+    CategoriesCallbackHandler(category_service, activity_service),
+    CategoryCallbackHandler(category_service),
+    AddCategoryCallbackHandler(),
+    SettingsCategoryCallbackHandler(category_service),
+    EditCategoryNameCallbackHandler(category_service),
+    DeleteCategoryCallbackHandler(category_service, activity_service),
+    DeleteCategoryAfterVoteCallbackHandler(category_service),
+
+    AddActivityCallbackHandler(),
+    SettingsActivityCallbackHandler(activity_service),
+    EditActivityNameCallbackHandler(activity_service),
+    EditActivityCategoryCallbackHandler(activity_service, category_service),
+    EditActivityCategoryAfterAnswerCallbackHandler(activity_service, category_service),
+    DeleteActivityCallbackHandler(activity_service),
+    DeleteActivityAfterVoteCallbackHandler(activity_service, category_service),
+
+    StatisticsCallbackHandler(),
+    StatisticsPostAnswerCallbackHandler(statistics_service, activity_service),
+
+    StartTrackingCallbackHandler(category_service),
+    StartTrackingAfterCategoryCallbackHandler(activity_service),
+    StartTrackingAfterActivityCallbackHandler(event_service, activity_service),
+
+    StopTrackingCallbackHandler(activity_service, event_service),
+    StopTrackingAfterVoteCallbackHandler(activity_service, event_service),
+
+    TrackCallbackHandler(category_service),
+    TrackAfterCategoryCallbackHandler(activity_service),
+    TrackAfterActivityCallbackHandler(activity_service),
+
+    ListEventsCallbackHandler(activity_service, statistics_service),
+    DeleteEventBeforeVoteCallbackHandler(event_service, activity_service, statistics_service),
+    DeleteEventAfterVoteCallbackHandler(activity_service, event_service),
+
+    TimeZoneCallbackHandler(user_service),
+    TimeZoneWriteCallbackHandler()
+])
 
 #### HANDLERS ####
-start_handler = StartHandler(bot)
-add_activity_post_answer_handler = AddActivityPostAnswerHandler(bot, activities)
-add_activity_handler = AddActivityHandler(bot, activities, add_activity_post_answer_handler)
-delete_activity_handler = DeleteActivityHandler(bot, activities)
-activities_handler = ActivitiesHandler(bot, activities)
-track_handler = TrackHandler(bot, activities)
-start_tracking_handler = StartTrackingHandler(bot, activities)
-stop_tracking_handler = StopTrackingHandler(bot, activities, stop_tracking_after_vote_callback_handler)
-last_events_post_answer_handler = LastEventsPostAnswerHandler(bot, activities, statistics_service)
-last_events_handler = LastEventsHandler(bot, activities, last_events_post_answer_handler)
-statistics_post_answer_handler = StatisticsPostAnswerHandler(bot, statistics_service)
-statistics_handler = StatisticsHandler(bot, statistics_post_answer_handler)
-delete_event_handler = DeleteEventHandler(bot, activities)
-time_zone_handler = TimeZoneHandler(bot, user_service)
+menu_handler = MenuHandler(activity_service)
+
+# category
+add_category_after_answer_handler = AddCategoryAfterAnswerHandler(category_service)
+edit_category_name_after_answer_handler = EditCategoryNameAfterAnswerHandler(category_service)
+
+# activity
+add_activity_post_answer_handler = AddActivityPostAnswerHandler(activity_service)
+edit_activity_name_after_answer_handler = EditActivityNameAfterAnswerHandler(activity_service)
+
+# track
+track_after_time_answer_handler = TrackAfterTimeAnswerHandler(activity_service, event_service)
+
+# statistics
+statistics_post_answer_handler = StatisticsPostAnswerHandler(statistics_service, activity_service)
+
+# user
+change_time_zone_handler = ChangeTimeZoneHandler(user_service)
 
 
-@bot.message_handler(commands=['start', 'help'])
-def main(message):
-    start_handler.handle(message)
+@dp.message_handler(commands=['start', 'menu'])
+async def menu(message):
+    await menu_handler.handle(message)
 
 
 #################################
 #       GENERAL CALLBACK        #
 #################################
 
-@bot.callback_query_handler(func=lambda call: True)
-def callback_handler(call):
-    callback_router.route(call)
+@dp.callback_query_handler(state="*")
+async def callback_handler(call):
+    await callback_router.route(call)
 
 
 #########################
 #       ACTIVITY        #
 #########################
 
-@bot.message_handler(commands=['add_activity'])
-def add_activity(message):
-    add_activity_handler.handle(message)
+
+@dp.message_handler(state=CreateActivityState.waiting_for_activity_name)
+async def add_activity_post_answer(message, state: FSMContext):
+    await add_activity_post_answer_handler.handle(message)
+    await state.finish()
 
 
-@bot.message_handler(commands=['delete_activity'])
-def delete_activity(message):
-    delete_activity_handler.handle(message)
+@dp.message_handler(state=EditActivityState.waiting_for_activity_name)
+async def edit_activity_name_after_answer(message, state: FSMContext):
+    await edit_activity_name_after_answer_handler.handle(message)
+    await state.finish()
 
 
-@bot.message_handler(commands=['activities'])
-def activities_(message):
-    activities_handler.handle(message)
+#########################
+#       CATEGORY        #
+#########################
+
+@dp.message_handler(state=CreateCategoryState.waiting_for_category_name)
+async def add_category_post_answer(message, state: FSMContext):
+    await add_category_after_answer_handler.handle(message)
+    await state.finish()
+
+
+@dp.message_handler(state=EditCategoryState.waiting_for_category_name)
+async def edit_category_name_after_answer(message, state: FSMContext):
+    await edit_category_name_after_answer_handler.handle(message)
+    await state.finish()
 
 
 ######################
 #       TRACK        #
 ######################
 
-@bot.message_handler(commands=['track'])
-def track(message):
-    track_handler.handle(message)
-
-
-@bot.message_handler(commands=['start_tracking'])
-def start_tracking(message):
-    start_tracking_handler.handle(message)
-
-
-@bot.message_handler(commands=['stop_tracking'])
-def start_tracking(message):
-    stop_tracking_handler.handle(message)
-
-
-######################
-#       EVENT        #
-######################
-
-@bot.message_handler(commands=['last_events'])
-def last_events(message):
-    last_events_handler.handle(message)
-
-
-@bot.message_handler(commands=['delete_event'])
-def last_events(message):
-    delete_event_handler.handle(message)
+@dp.message_handler(state=TrackWriteTimeRangeState.waiting_for_time_range)
+async def track_(message, state: FSMContext):
+    await track_after_time_answer_handler.handle(message)
+    await state.finish()
 
 
 #####################
@@ -149,18 +169,19 @@ def last_events(message):
 #####################
 
 
-@bot.message_handler(commands=['time_zone'])
-def time_zone(message):
-    time_zone_handler.handle(message)
+@dp.message_handler(state=TimeZoneWriteTZNameState.waiting_for_time_zone_name)
+async def time_zone_after_answer(message):
+    await change_time_zone_handler.handle(message)
 
 
 #######################
 #       REPORT        #
 #######################
 
-@bot.message_handler(commands=['statistics'])
-def statistics(message):
-    statistics_handler.handle(message)
+@dp.message_handler(state=StatisticWriteTimeRangeState.waiting_for_time_range)
+async def statistics_post_time_answer(message, state: FSMContext):
+    await statistics_post_answer_handler.handle(message)
+    await state.finish()
 
 
 ##############################
@@ -168,20 +189,28 @@ def statistics(message):
 ##############################
 
 
-@server.route('/' + config.BOT_API_KEY, methods=['POST'])
-def get_message():
-    json_string = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_string)
-    bot.process_new_updates([update])
-    return "!", 200
+async def on_startup(_):
+    await bot.set_webhook(config.WEBHOOK_URL + config.BOT_API_KEY)
 
 
-@server.route("/")
-def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url=config.WEBHOOK_URL + config.BOT_API_KEY)
-    return "!", 200
+async def on_shutdown(dp):
+    print('Shutting down..')
+
+    await bot.delete_webhook()
+
+    await dp.storage.close()
+    await dp.storage.wait_closed()
+
+    print('Bye!')
 
 
 if __name__ == "__main__":
-    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+    executor.start_webhook(
+        dispatcher=dp,
+        webhook_path='/' + config.BOT_API_KEY,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=True,
+        host=config.SERVER_HOST,
+        port=config.SERVER_PORT,
+    )

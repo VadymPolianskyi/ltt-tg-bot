@@ -1,9 +1,9 @@
 import json
 from datetime import datetime
+from json import JSONDecodeError
 
-from telebot import TeleBot
-from telebot.types import CallbackQuery
-from telebot.types import Message
+from aiogram.types import CallbackQuery
+from aiogram.types import Message
 
 from app.config import msg
 from app.service import time_service
@@ -11,67 +11,68 @@ from app.service.user import UserService
 
 
 class MessageMeta:
-    def __init__(self, user_id: int, time: datetime, text: str):
-        self.user_id = user_id
+    def __init__(self, message: Message, time: datetime):
+        self.user_id = message.from_user.id
+        self.text = message.text
         self.time = time
-        self.text = text
+        self.original = message
 
 
 class CallbackMeta:
-    def __init__(self, user_id: int, time: datetime, payload: dict):
-        self.user_id = user_id
+    def __init__(self, call: CallbackQuery, time: datetime):
+        self.user_id = call.from_user.id
         self.time = time
-        self.payload = payload
+        try:
+            self.payload = json.loads(call.data)
+        except JSONDecodeError:
+            self.payload = call.data
+        self.original = call
 
 
 class TelegramMessageHandler:
 
-    def __init__(self, bot: TeleBot):
-        self.bot = bot
+    def __init__(self):
+        print(f'Creating {self.__class__.__name__}...')
         self.user_service = UserService()
 
-    def handle(self, message: Message, *args):
+    async def handle(self, message: Message, *args):
+        user_id: int = message.from_user.id
         try:
-            user_id = message.from_user.id
-            text = message.text
-
             time_zone: str = self.user_service.get_time_zone(user_id)
-            msg_time: datetime = time_service.from_timestamp(message.date, time_zone)
+            msg_time: datetime = time_service.to_tz(message.date, time_zone)
 
-            print(f"Message '{text}' in chat({user_id}) at '{msg_time}'. Args: {','.join(args)}")
+            print(f"Message '{message.text}' in chat({user_id}) at '{msg_time}'. Args: {','.join(args)}")
 
-            self.handle_(MessageMeta(user_id, msg_time, text), *args)
+            await self.handle_(MessageMeta(message, msg_time), *args)
         except Exception as e:
             print(e)
-            self.bot.send_message(message.chat.id, msg.ERROR_BASIC)
+            await message.answer(user_id, msg.ERROR_BASIC)
 
-    def handle_(self, message: MessageMeta, *args):
+    async def handle_(self, message: MessageMeta, *args):
         """Response to Message"""
         pass
 
 
 class TelegramCallbackHandler:
-    def __init__(self, bot: TeleBot):
-        self.bot = bot
+    def __init__(self):
+        print(f'Creating {self.__class__.__name__}...')
         self.user_service = UserService()
 
-    def handle(self, call: CallbackQuery):
+    async def handle(self, call: CallbackQuery):
         user_id: int = call.from_user.id
-        message_id: int = call.message.id
-        time_zone: str = self.user_service.get_time_zone(user_id)
-        callback_time: datetime = time_service.from_timestamp(call.message.date, time_zone)
-
-        payload: dict = json.loads(call.data)
-        print(f"Callback with payload '{payload}' in chat({user_id}) at '{callback_time}'")
 
         try:
-            self.bot.delete_message(chat_id=user_id, message_id=message_id)
+            time_zone: str = self.user_service.get_time_zone(user_id)
+            callback_time: datetime = time_service.to_tz(call.message.date, time_zone)
 
-            self.handle_(CallbackMeta(user_id=user_id, time=callback_time, payload=payload))
+            print(f"Callback with data '{call.data}' in chat({user_id}) at '{callback_time}'")
+            await call.bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
+
+            await self.handle_(CallbackMeta(call, time=callback_time))
         except Exception as e:
             print(e)
-            self.bot.send_message(user_id, msg.ERROR_BASIC)
+            await call.answer(user_id, msg.ERROR_BASIC)
 
-    def handle_(self, callback: CallbackMeta):
+    async def handle_(self, call: CallbackMeta):
         """Response to Callback Message"""
         pass

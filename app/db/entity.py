@@ -5,18 +5,41 @@ from enum import Enum
 
 class User:
     def __init__(self, id: int, username: str, time_zone: str = None, created: datetime = None):
-        self.id = id
+        self.id = uuid.uuid4() if id is None else id
         self.username = username
         self.time_zone = time_zone
         self.created = created
 
+    @classmethod
+    def from_dict(cls, r):
+        return User(id=r['id'], username=r['username'], time_zone=r['time_zone'], created=r['created'])
 
-class Activity:
+
+class Category:
     def __init__(self, name: str, user_id: int, created: datetime = None, id: str = None, ):
+        self.id = uuid.uuid4() if id is None else id
         self.name = name
         self.user_id = user_id
-        self.id = uuid.uuid4() if id is None else id
         self.created = created
+
+    @classmethod
+    def from_dict(cls, r):
+        return Category(id=r['id'], name=r['name'], user_id=r['user_id'], created=r['created'])
+
+
+class Activity:
+    def __init__(self, name: str, user_id: int, created: datetime = None, id: str = None,
+                 category_id: str = None):
+        self.id = str(uuid.uuid4()) if id is None else id
+        self.name = name
+        self.user_id = user_id
+        self.created = created
+        self.category_id = category_id
+
+    @classmethod
+    def from_dict(cls, r):
+        return Activity(id=r['id'], name=r['name'], user_id=r['user_id'], created=r['created'],
+                        category_id=r['category_id'])
 
 
 class EventType(Enum):
@@ -34,6 +57,11 @@ class Event:
         self.last = last
         self.user_id = user_id
 
+    @classmethod
+    def from_dict(cls, r):
+        return Event(id=r['id'], activity_id=r['activity_id'], event_type=r['type'], time=r['time'],
+                     user_id=r['user_id'], last=r['last'])
+
 
 class EventStatistic:
     def __init__(self, date: datetime, spent: timedelta, activity_name: str, stop_event_id: str):
@@ -41,3 +69,8 @@ class EventStatistic:
         self.spent: timedelta = spent
         self.activity_name: str = activity_name
         self.stop_event_id: str = stop_event_id
+
+    @classmethod
+    def from_dict(cls, r):
+        return EventStatistic(date=r['ev_date'], spent=r['spent'], activity_name=r['activity'],
+                              stop_event_id=r['event_id'])

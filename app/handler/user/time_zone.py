@@ -1,56 +1,62 @@
-from telebot import TeleBot
+from aiogram import Dispatcher
+from aiogram.types import Message
 
-from app.config import msg
+from app import state
+from app.config import msg, marker
 from app.handler.general import TelegramMessageHandler, MessageMeta, TelegramCallbackHandler, CallbackMeta
 from app.service import markup, time_service
 from app.service.user import UserService
 
 
-class TimeZoneHandler(TelegramMessageHandler):
-    def __init__(self, bot: TeleBot, user_service: UserService):
-        print('Creating TimeZoneHandler...')
-        super().__init__(bot)
+class GeneralTimeZoneHandler:
+    def __init__(self, user_service: UserService):
         self.user_service = user_service
 
-    def handle_(self, message: MessageMeta, *args):
-        options_keyboard = markup.create_simple_inline_markup(
-            ChangeTimeZoneCallbackHandler.MARKER,
-            ["Change Time Zone"]
-        )
+    async def _show_current_time_zone_menu(self, original_message: Message, user_id: int):
+        tz_menu = markup.create_inline_markup_([
+            (msg.CHANGE_TIME_ZONE_BUTTON, TimeZoneWriteCallbackHandler.MARKER, '_'),
+            (msg.BACK_BUTTON, marker.MENU, '_')
+        ])
 
-        user_time_zone: str = self.user_service.get_time_zone(message.user_id)
+        user_time_zone: str = self.user_service.get_time_zone(user_id)
         current_time = time_service.now(tz=user_time_zone).strftime("%H:%M")
-        self.bot.send_message(chat_id=message.user_id, text=msg.TIMEZONE_1.format(user_time_zone, current_time),
-                              reply_markup=options_keyboard)
+        await original_message.answer(msg.TIMEZONE_CURRENT.format(user_time_zone, current_time), reply_markup=tz_menu)
 
 
-class ChangeTimeZoneCallbackHandler(TelegramCallbackHandler):
-    MARKER = 'tmz'
+class TimeZoneCallbackHandler(TelegramCallbackHandler, GeneralTimeZoneHandler):
+    MARKER = marker.TIME_ZONE
 
-    def __init__(self, bot: TeleBot, next_handler: TelegramMessageHandler):
-        print('Creating ChangeTimeZoneCallbackHandler...')
-        super().__init__(bot)
-        self.next_handler = next_handler
+    def __init__(self, user_service: UserService):
+        TelegramCallbackHandler.__init__(self)
+        GeneralTimeZoneHandler.__init__(self, user_service)
 
-    def handle_(self, callback: CallbackMeta):
-        self.bot.send_message(callback.user_id, msg.TIMEZONE_2, disable_web_page_preview=True)
-        self.bot.register_next_step_handler_by_chat_id(callback.user_id, self.next_handler.handle)
+    async def handle_(self, callback: CallbackMeta):
+        await self._show_current_time_zone_menu(callback.original.message, callback.user_id)
 
 
-class ChangeTimeZoneHandler(TelegramMessageHandler):
+class TimeZoneWriteCallbackHandler(TelegramCallbackHandler):
+    MARKER = 'tmzch'
 
-    def __init__(self, bot: TeleBot, user_service: UserService):
-        print('Creating ChangeTimeZoneHandler...')
-        super().__init__(bot)
-        self.user_service = user_service
+    def __init__(self):
+        super().__init__()
 
-    def handle_(self, message: MessageMeta, *args):
+    async def handle_(self, callback: CallbackMeta):
+        await callback.original.message.answer(msg.TIMEZONE_EDIT, disable_web_page_preview=True)
+        await state.TimeZoneWriteTZNameState.waiting_for_time_zone_name.set()
+
+
+class ChangeTimeZoneHandler(TelegramMessageHandler, GeneralTimeZoneHandler):
+
+    def __init__(self, user_service: UserService):
+        TelegramCallbackHandler.__init__(self)
+        GeneralTimeZoneHandler.__init__(self, user_service)
+
+    async def handle_(self, message: MessageMeta, *args):
         time_zone: str = message.text
         if time_service.is_valid_time_zone(time_zone):
             self.user_service.update_time_zone(message.user_id, time_zone)
-            current_time = time_service.now(tz=time_zone).strftime("%H:%M")
 
-            self.bot.send_message(message.user_id, msg.TIMEZONE_3.format(time_zone, current_time))
+            await Dispatcher.get_current().current_state().finish()
+            await self._show_current_time_zone_menu(message.original, message.user_id)
         else:
-            self.bot.send_message(message.user_id, msg.TIMEZONE_2, disable_web_page_preview=True)
-            self.bot.register_next_step_handler_by_chat_id(message.user_id, self.handle)
+            await message.original.answer(msg.TIMEZONE_EDIT, disable_web_page_preview=True)
