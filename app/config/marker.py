@@ -20,5 +20,7 @@ TRACK = 'trk'
 START_TRACKING = 'sttr'
 STOP_TRACKING = 'stptr'
 
+LIST_EVENTS = 'levt'
+
 TIME_ZONE = 'tmzn'
 

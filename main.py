@@ -16,12 +16,10 @@ from app.handler.category.delete_category import DeleteCategoryCallbackHandler, 
     DeleteCategoryAfterVoteCallbackHandler
 from app.handler.category.edit_category import EditCategoryNameAfterAnswerHandler, EditCategoryNameCallbackHandler
 from app.handler.category.settings_category import SettingsCategoryCallbackHandler
-from app.handler.event.delete_event import DeleteEventHandler, DeleteEventBeforeEventsVoteCallbackHandler, \
-    DeleteEventBeforeVoteCallbackHandler, DeleteEventAfterVoteCallbackHandler
-from app.handler.event.last_event import LastEventsPostAnswerHandler, LastEventsHandler
+from app.handler.event.events import ListEventsCallbackHandler, DeleteEventBeforeVoteCallbackHandler, \
+    DeleteEventAfterVoteCallbackHandler
 from app.handler.menu import MenuHandler, MenuCallbackHandler
 from app.handler.router import CallbackRouter
-from app.handler.start import StartHandler
 from app.handler.statistics.statistics import StatisticsPostAnswerHandler, StatisticsPostAnswerCallbackHandler, \
     StatisticsCallbackHandler
 from app.handler.track.start_tracking import StartTrackingCallbackHandler, StartTrackingAfterCategoryCallbackHandler, \
@@ -36,7 +34,7 @@ from app.service.event import EventService
 from app.service.statistics import StatisticsService
 from app.service.user import UserService
 from app.state import CreateActivityState, CreateCategoryState, TrackWriteTimeRangeState, StatisticWriteTimeRangeState, \
-    TimeZoneWriteTZNameState, LastEventsWriteCountState, EditCategoryState, EditActivityState
+    TimeZoneWriteTZNameState, EditCategoryState, EditActivityState
 
 bot = Bot(token=config.BOT_API_KEY, parse_mode="Markdown")
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -82,16 +80,15 @@ callback_router = CallbackRouter([
     TrackAfterCategoryCallbackHandler(activities),
     TrackAfterActivityCallbackHandler(activities),
 
-    DeleteEventBeforeEventsVoteCallbackHandler(statistics_service),
-    DeleteEventBeforeVoteCallbackHandler(statistics_service),
-    DeleteEventAfterVoteCallbackHandler(events),
+    ListEventsCallbackHandler(activities, statistics_service),
+    DeleteEventBeforeVoteCallbackHandler(events, activities, statistics_service),
+    DeleteEventAfterVoteCallbackHandler(activities, events),
 
     TimeZoneCallbackHandler(user_service),
     TimeZoneWriteCallbackHandler()
 ])
 
 #### HANDLERS ####
-start_handler = StartHandler()
 menu_handler = MenuHandler()
 
 # category
@@ -105,21 +102,11 @@ edit_activity_name_after_answer_handler = EditActivityNameAfterAnswerHandler(act
 # track
 track_after_time_answer_handler = TrackAfterTimeAnswerHandler(activities, events)
 
-# event
-last_events_post_answer_handler = LastEventsPostAnswerHandler(activities, statistics_service)
-last_events_handler = LastEventsHandler(activities)
-delete_event_handler = DeleteEventHandler(activities)
-
 # statistics
 statistics_post_answer_handler = StatisticsPostAnswerHandler(statistics_service)
 
 # user
 change_time_zone_handler = ChangeTimeZoneHandler(user_service)
-
-
-@dp.message_handler(commands=['start', 'help'])
-async def start(message):
-    await start_handler.handle(message)
 
 
 @dp.message_handler(commands=['menu'])
@@ -177,26 +164,6 @@ async def edit_category_name_after_answer(message, state: FSMContext):
 async def track_(message, state: FSMContext):
     await track_after_time_answer_handler.handle(message)
     await state.finish()
-
-
-######################
-#       EVENT        #
-######################
-
-@dp.message_handler(commands=['last_events'])
-async def last_events(message):
-    await last_events_handler.handle(message)
-
-
-@dp.message_handler(state=LastEventsWriteCountState.waiting_for_count)
-async def last_events_after_count(message, state: FSMContext):
-    await last_events_post_answer_handler.handle(message)
-    await state.finish()
-
-
-@dp.message_handler(commands=['delete_event'])
-async def delete_event(message):
-    await delete_event_handler.handle(message)
 
 
 #####################

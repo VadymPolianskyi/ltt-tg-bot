@@ -22,7 +22,7 @@ class DeleteActivityCallbackHandler(TelegramCallbackHandler):
 
         vote_keyboard = markup.create_voter_inline_markup(self.MARKER, activity.id)
         await callback.original.message.answer(
-            text=msg.DELETE_ACTIVITY_2.format(activity.name),
+            text=msg.DELETE_ACTIVITY_VOTE.format(activity.name),
             reply_markup=vote_keyboard
         )
         await Dispatcher.get_current().current_state().update_data(activity_id=activity.id)
@@ -43,13 +43,13 @@ class DeleteActivityAfterVoteCallbackHandler(TelegramCallbackHandler, GeneralAct
             activity = self.activity_service.find(vote_result)
 
             self.activity_service.delete(activity.id)
-            await callback.original.message.answer(msg.DELETE_ACTIVITY_3_1.format(activity.name))
+            await callback.original.message.answer(msg.DELETE_ACTIVITY_DONE.format(activity.name))
 
             # to category
             category = self.category_service.find(activity.category_id)
             await self._show_category_menu(callback.original.message, category)
         else:
-            await callback.original.answer(msg.DELETE_ACTIVITY_4_1)
+            await callback.original.answer(msg.DELETE_ACTIVITY_CANCELED)
 
             activity_id = (await Dispatcher.get_current().current_state().get_data())['activity_id']
             activity = self.activity_service.find(activity_id)

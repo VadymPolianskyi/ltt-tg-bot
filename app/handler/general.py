@@ -55,6 +55,7 @@ class TelegramMessageHandler:
 
 class TelegramCallbackHandler:
     def __init__(self):
+        print(f'Creating {self.__class__.__name__}...')
         self.user_service = UserService()
 
     async def handle(self, call: CallbackQuery):

@@ -21,23 +21,24 @@ class CategoryService:
         print(f"Delete Category({category_id})")
         self.dao.delete(category_id)
 
+    def update(self, category: Category):
+        print(f"Update Category({category.id}) for User({category.user_id})")
+        self.dao.update(category)
+
     def all(self, user_id: int) -> list:
         print(f"Show all categories for User({str(user_id)})")
         return self.dao.find_all_by_user_id(user_id)
-
-    def show_all_names(self, user_id: int) -> list:
-        print(f"Show all category titles for User({str(user_id)})")
-        return [a.name for a in self.all(user_id)]
 
     def find(self, category_id: str) -> Category:
         print(f"Find Category({category_id})")
         return self.dao.find(category_id)
 
-    def create_all_categories_markup(self, marker: str, user_id: int, back_button_marker: str):
+    def create_all_categories_markup(self, marker: str, user_id: int, back_button_marker: str,
+                                     back_button_value: str = '_'):
         print(f"Create all categories markup for User({user_id})")
 
         buttons = [(msg.CATEGORY_SIGN + ' ' + c.name, marker, c.id) for c in self.all(user_id)]
-        buttons.append((msg.BACK_BUTTON, back_button_marker, '_'))
+        buttons.append((msg.BACK_BUTTON, back_button_marker, back_button_value))
 
         return markup.create_inline_markup_(buttons)
 
@@ -59,10 +60,6 @@ class CategoryService:
         buttons.append((msg.BACK_BUTTON, marker.CATEGORIES, "_"))
 
         return markup.create_inline_markup_(buttons, buttons_in_line=2)
-
-    def update(self, category: Category):
-        print(f"Update Category({category.id}) for User({category.user_id})")
-        self.dao.update(category)
 
     def get_or_create_default(self, user_id) -> Category:
         default_category_name = 'default'

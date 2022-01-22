@@ -25,7 +25,7 @@ class TrackCallbackHandler(TelegramCallbackHandler):
             back_button_marker=marker.MENU
         )
 
-        await callback.original.message.answer(msg.TRACK_1, reply_markup=categories_keyboard)
+        await callback.original.message.answer(msg.TRACK_CATEGORY, reply_markup=categories_keyboard)
 
 
 class TrackAfterCategoryCallbackHandler(TelegramCallbackHandler):
@@ -44,7 +44,7 @@ class TrackAfterCategoryCallbackHandler(TelegramCallbackHandler):
             back_button_marker=marker.TRACK
         )
 
-        await callback.original.message.answer(msg.TRACK_2, reply_markup=activities_keyboard)
+        await callback.original.message.answer(msg.TRACK_ACTIVITY, reply_markup=activities_keyboard)
 
 
 class TrackAfterActivityCallbackHandler(TelegramCallbackHandler):
@@ -57,7 +57,7 @@ class TrackAfterActivityCallbackHandler(TelegramCallbackHandler):
     async def handle_(self, callback: CallbackMeta):
         activity = self.activity_service.find(callback.payload[self.MARKER])
 
-        await callback.original.message.answer(msg.TRACK_3.format(activity.name))
+        await callback.original.message.answer(msg.TRACK_TIME_RANGE.format(activity.name))
 
         await state.TrackWriteTimeRangeState.waiting_for_time_range.set()
         await Dispatcher.get_current().current_state().update_data(activity_name=activity.id)
@@ -91,5 +91,5 @@ class TrackAfterTimeAnswerHandler(TelegramMessageHandler, MenuGeneral):
             time=end_time,
             last=e_start.id)
 
-        await message.original.answer(msg.FINISHED_TRACKING.format(activity.name, hours, minutes))
+        await message.original.answer(msg.TRACK_FINISHED.format(activity.name, hours, minutes))
         await self._show_menu(message.original)

@@ -20,7 +20,7 @@ class GeneralTimeZoneHandler:
 
         user_time_zone: str = self.user_service.get_time_zone(user_id)
         current_time = time_service.now(tz=user_time_zone).strftime("%H:%M")
-        await original_message.answer(msg.TIMEZONE_1.format(user_time_zone, current_time), reply_markup=tz_menu)
+        await original_message.answer(msg.TIMEZONE_CURRENT.format(user_time_zone, current_time), reply_markup=tz_menu)
 
 
 class TimeZoneCallbackHandler(TelegramCallbackHandler, GeneralTimeZoneHandler):
@@ -41,7 +41,7 @@ class TimeZoneWriteCallbackHandler(TelegramCallbackHandler):
         super().__init__()
 
     async def handle_(self, callback: CallbackMeta):
-        await callback.original.message.answer(msg.TIMEZONE_2, disable_web_page_preview=True)
+        await callback.original.message.answer(msg.TIMEZONE_EDIT, disable_web_page_preview=True)
         await state.TimeZoneWriteTZNameState.waiting_for_time_zone_name.set()
 
 
@@ -59,4 +59,4 @@ class ChangeTimeZoneHandler(TelegramMessageHandler, GeneralTimeZoneHandler):
             await Dispatcher.get_current().current_state().finish()
             await self._show_current_time_zone_menu(message.original, message.user_id)
         else:
-            await message.original.answer(msg.TIMEZONE_2, disable_web_page_preview=True)
+            await message.original.answer(msg.TIMEZONE_EDIT, disable_web_page_preview=True)

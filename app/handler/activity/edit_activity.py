@@ -59,11 +59,12 @@ class EditActivityCategoryCallbackHandler(TelegramCallbackHandler):
     async def handle_(self, callback: CallbackMeta):
         activity = self.activity_service.find(callback.payload[self.MARKER])
 
-        all_categories_buttons = [(msg.CATEGORY_SIGN + ' ' + c.name, c.id) for c in
-                                  self.category_service.all(callback.user_id)]
-
-        all_categories_markup = markup.create_inline_markup(EditActivityCategoryAfterAnswerCallbackHandler.MARKER,
-                                                            all_categories_buttons)
+        all_categories_markup = self.category_service.create_all_categories_markup(
+            marker=EditActivityCategoryAfterAnswerCallbackHandler.MARKER,
+            user_id=callback.user_id,
+            back_button_marker=marker.ACTIVITY_SETTINGS,
+            back_button_value=activity.id
+        )
 
         await callback.original.message.answer(msg.EDIT_ACTIVITY_CATEGORY.format(activity.name),
                                                reply_markup=all_categories_markup)

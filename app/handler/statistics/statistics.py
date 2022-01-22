@@ -27,7 +27,7 @@ class StatisticsCallbackHandler(TelegramCallbackHandler):
         ]
         time_range_markup = markup.create_inline_markup_(markup_buttons)
 
-        sent_msg = await call.original.message.answer(msg.STATISTIC_1, reply_markup=time_range_markup)
+        sent_msg = await call.original.message.answer(msg.STATISTIC_PERIOD, reply_markup=time_range_markup)
         await StatisticWriteTimeRangeState.waiting_for_time_range.set()
         await Dispatcher.get_current().current_state().update_data(message_id=sent_msg.message_id)
 

@@ -20,7 +20,7 @@ class DeleteCategoryCallbackHandler(TelegramCallbackHandler):
 
         category = self.categories.find(category_id)
 
-        is_empty = len(self.activities.find_all(category_id)) == 0
+        is_empty = len(self.activities.all(category_id)) == 0
 
         if is_empty:
             vote_keyboard = markup.create_voter_inline_markup(self.MARKER, category_id)

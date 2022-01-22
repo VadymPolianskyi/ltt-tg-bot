@@ -43,3 +43,7 @@ class EventService:
 
         hours, minutes = time_service.count_difference(e_start.time, e_stop.time)
         return hours, minutes
+
+    def find(self, event_id: str):
+        print(f'Find Event({event_id})')
+        return self.dao.find(event_id)

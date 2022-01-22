@@ -21,7 +21,7 @@ class StartTrackingCallbackHandler(TelegramCallbackHandler):
             back_button_marker=marker.MENU
         )
 
-        await callback.original.message.answer(msg.START_TRACKING_1, reply_markup=categories_keyboard)
+        await callback.original.message.answer(msg.START_TRACKING_CATEGORY, reply_markup=categories_keyboard)
 
 
 class StartTrackingAfterCategoryCallbackHandler(TelegramCallbackHandler):
@@ -40,7 +40,7 @@ class StartTrackingAfterCategoryCallbackHandler(TelegramCallbackHandler):
             back_button_marker=marker.START_TRACKING
         )
 
-        await callback.original.message.answer(msg.START_TRACKING_2, reply_markup=activities_keyboard)
+        await callback.original.message.answer(msg.START_TRACKING_ACTIVITY, reply_markup=activities_keyboard)
 
 
 class StartTrackingAfterActivityCallbackHandler(TelegramCallbackHandler, MenuGeneral):
@@ -59,5 +59,5 @@ class StartTrackingAfterActivityCallbackHandler(TelegramCallbackHandler, MenuGen
             event_type=EventType.START,
             time=callback.time
         )
-        await callback.original.answer(msg.START_TRACKING_3)
+        await callback.original.answer(msg.START_TRACKING_DONE)
         await self._show_menu(callback.original.message)

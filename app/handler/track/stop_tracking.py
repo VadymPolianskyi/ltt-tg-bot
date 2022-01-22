@@ -26,9 +26,9 @@ class StopTrackingCallbackHandler(TelegramCallbackHandler, MenuGeneral):
             buttons = [(a.name, StopTrackingAfterVoteCallbackHandler.MARKER, a.id) for a in started_activities]
             buttons.append((msg.BACK_BUTTON, marker.MENU, '_'))
             started_activities_keyboard = markup.create_inline_markup_(buttons)
-            await callback.original.message.answer(msg.STOP_TRACKING_2_1, reply_markup=started_activities_keyboard)
+            await callback.original.message.answer(msg.STOP_TRACKING_ACTIVITY, reply_markup=started_activities_keyboard)
         else:
-            await callback.original.message.answer(msg.STOP_TRACKING_3_1)
+            await callback.original.message.answer(msg.STOP_TRACKING_NOTHING)
             await self._show_menu(callback.original.message)
 
 
@@ -44,6 +44,6 @@ class StopTrackingAfterVoteCallbackHandler(TelegramCallbackHandler, MenuGeneral)
         activity = self.activity_service.find(callback.payload[self.MARKER])
 
         hours, minutes = self.event_service.finish_and_calculate_time(callback.user_id, activity.id, callback.time)
-        await callback.original.message.answer(msg.STOP_TRACKING_2_2.format(activity.name, hours, minutes))
+        await callback.original.message.answer(msg.STOP_TRACKING_DONE.format(activity.name, hours, minutes))
         time.sleep(1)
         await self._show_menu(callback.original.message)
