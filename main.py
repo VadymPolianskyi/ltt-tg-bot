@@ -39,71 +39,71 @@ from app.state import CreateActivityState, CreateCategoryState, TrackWriteTimeRa
 bot = Bot(token=config.BOT_API_KEY, parse_mode="Markdown")
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-categories = CategoryService()
-activities = ActivityService()
-events = EventService()
+category_service = CategoryService()
+activity_service = ActivityService()
+event_service = EventService()
 user_service = UserService()
 statistics_service = StatisticsService()
 
 #### CALLBACK ####
 
 callback_router = CallbackRouter([
-    MenuCallbackHandler(),
+    MenuCallbackHandler(activity_service),
 
-    CategoriesCallbackHandler(categories, activities),
-    CategoryCallbackHandler(categories),
+    CategoriesCallbackHandler(category_service, activity_service),
+    CategoryCallbackHandler(category_service),
     AddCategoryCallbackHandler(),
-    SettingsCategoryCallbackHandler(categories),
-    EditCategoryNameCallbackHandler(categories),
-    DeleteCategoryCallbackHandler(categories, activities),
-    DeleteCategoryAfterVoteCallbackHandler(categories),
+    SettingsCategoryCallbackHandler(category_service),
+    EditCategoryNameCallbackHandler(category_service),
+    DeleteCategoryCallbackHandler(category_service, activity_service),
+    DeleteCategoryAfterVoteCallbackHandler(category_service),
 
     AddActivityCallbackHandler(),
-    SettingsActivityCallbackHandler(activities),
-    EditActivityNameCallbackHandler(activities),
-    EditActivityCategoryCallbackHandler(activities, categories),
-    EditActivityCategoryAfterAnswerCallbackHandler(activities, categories),
-    DeleteActivityCallbackHandler(activities),
-    DeleteActivityAfterVoteCallbackHandler(activities, categories),
+    SettingsActivityCallbackHandler(activity_service),
+    EditActivityNameCallbackHandler(activity_service),
+    EditActivityCategoryCallbackHandler(activity_service, category_service),
+    EditActivityCategoryAfterAnswerCallbackHandler(activity_service, category_service),
+    DeleteActivityCallbackHandler(activity_service),
+    DeleteActivityAfterVoteCallbackHandler(activity_service, category_service),
 
     StatisticsCallbackHandler(),
-    StatisticsPostAnswerCallbackHandler(statistics_service),
+    StatisticsPostAnswerCallbackHandler(statistics_service, activity_service),
 
-    StartTrackingCallbackHandler(categories),
-    StartTrackingAfterCategoryCallbackHandler(activities),
-    StartTrackingAfterActivityCallbackHandler(events),
+    StartTrackingCallbackHandler(category_service),
+    StartTrackingAfterCategoryCallbackHandler(activity_service),
+    StartTrackingAfterActivityCallbackHandler(event_service, activity_service),
 
-    StopTrackingCallbackHandler(activities, events),
-    StopTrackingAfterVoteCallbackHandler(activities, events),
+    StopTrackingCallbackHandler(activity_service, event_service),
+    StopTrackingAfterVoteCallbackHandler(activity_service, event_service),
 
-    TrackCallbackHandler(categories),
-    TrackAfterCategoryCallbackHandler(activities),
-    TrackAfterActivityCallbackHandler(activities),
+    TrackCallbackHandler(category_service),
+    TrackAfterCategoryCallbackHandler(activity_service),
+    TrackAfterActivityCallbackHandler(activity_service),
 
-    ListEventsCallbackHandler(activities, statistics_service),
-    DeleteEventBeforeVoteCallbackHandler(events, activities, statistics_service),
-    DeleteEventAfterVoteCallbackHandler(activities, events),
+    ListEventsCallbackHandler(activity_service, statistics_service),
+    DeleteEventBeforeVoteCallbackHandler(event_service, activity_service, statistics_service),
+    DeleteEventAfterVoteCallbackHandler(activity_service, event_service),
 
     TimeZoneCallbackHandler(user_service),
     TimeZoneWriteCallbackHandler()
 ])
 
 #### HANDLERS ####
-menu_handler = MenuHandler()
+menu_handler = MenuHandler(activity_service)
 
 # category
-add_category_after_answer_handler = AddCategoryAfterAnswerHandler(categories)
-edit_category_name_after_answer_handler = EditCategoryNameAfterAnswerHandler(categories)
+add_category_after_answer_handler = AddCategoryAfterAnswerHandler(category_service)
+edit_category_name_after_answer_handler = EditCategoryNameAfterAnswerHandler(category_service)
 
 # activity
-add_activity_post_answer_handler = AddActivityPostAnswerHandler(activities)
-edit_activity_name_after_answer_handler = EditActivityNameAfterAnswerHandler(activities)
+add_activity_post_answer_handler = AddActivityPostAnswerHandler(activity_service)
+edit_activity_name_after_answer_handler = EditActivityNameAfterAnswerHandler(activity_service)
 
 # track
-track_after_time_answer_handler = TrackAfterTimeAnswerHandler(activities, events)
+track_after_time_answer_handler = TrackAfterTimeAnswerHandler(activity_service, event_service)
 
 # statistics
-statistics_post_answer_handler = StatisticsPostAnswerHandler(statistics_service)
+statistics_post_answer_handler = StatisticsPostAnswerHandler(statistics_service, activity_service)
 
 # user
 change_time_zone_handler = ChangeTimeZoneHandler(user_service)

@@ -6,6 +6,7 @@ from app.config import msg, marker
 from app.handler.general import TelegramMessageHandler, MessageMeta, TelegramCallbackHandler, CallbackMeta
 from app.handler.menu import MenuGeneral
 from app.service import markup
+from app.service.activity import ActivityService
 from app.service.statistics import StatisticsService
 from app.state import StatisticWriteTimeRangeState
 
@@ -35,8 +36,9 @@ class StatisticsCallbackHandler(TelegramCallbackHandler):
 class StatisticsPostAnswerCallbackHandler(TelegramCallbackHandler, MenuGeneral):
     MARKER = 'stp'
 
-    def __init__(self, statistics_service: StatisticsService):
+    def __init__(self, statistics_service: StatisticsService, activity_service: ActivityService):
         TelegramCallbackHandler.__init__(self)
+        MenuGeneral.__init__(self, activity_service)
         self.statistics_service = statistics_service
 
     async def handle_(self, call: CallbackMeta):
@@ -50,12 +52,13 @@ class StatisticsPostAnswerCallbackHandler(TelegramCallbackHandler, MenuGeneral):
 
         await call.original.message.answer(report_message)
         time.sleep(1)
-        await self._show_menu(call.original.message)
+        await self._show_menu(call.original.message, call.user_id)
 
 
 class StatisticsPostAnswerHandler(TelegramMessageHandler, MenuGeneral):
-    def __init__(self, statistics_service: StatisticsService):
+    def __init__(self, statistics_service: StatisticsService, activity_service: ActivityService):
         TelegramMessageHandler.__init__(self)
+        MenuGeneral.__init__(self, activity_service)
         self.statistics_service = statistics_service
 
     async def handle_(self, message: MessageMeta, *args):

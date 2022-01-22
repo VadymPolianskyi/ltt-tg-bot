@@ -46,8 +46,9 @@ class StartTrackingAfterCategoryCallbackHandler(TelegramCallbackHandler):
 class StartTrackingAfterActivityCallbackHandler(TelegramCallbackHandler, MenuGeneral):
     MARKER = 'straa'
 
-    def __init__(self, event_service: EventService):
+    def __init__(self, event_service: EventService, activity_service: ActivityService):
         TelegramCallbackHandler.__init__(self)
+        MenuGeneral.__init__(self, activity_service)
         self.event_service = event_service
 
     async def handle_(self, callback: CallbackMeta):
@@ -60,4 +61,4 @@ class StartTrackingAfterActivityCallbackHandler(TelegramCallbackHandler, MenuGen
             time=callback.time
         )
         await callback.original.answer(msg.START_TRACKING_DONE)
-        await self._show_menu(callback.original.message)
+        await self._show_menu(callback.original.message, callback.user_id)

@@ -12,8 +12,8 @@ class StopTrackingCallbackHandler(TelegramCallbackHandler, MenuGeneral):
     MARKER = marker.STOP_TRACKING
 
     def __init__(self, activity_service: ActivityService, event_service: EventService):
-        super().__init__()
-        self.activity_service = activity_service
+        TelegramCallbackHandler.__init__(self)
+        MenuGeneral.__init__(self, activity_service)
         self.event_service = event_service
 
     async def handle_(self, callback: CallbackMeta):
@@ -29,15 +29,15 @@ class StopTrackingCallbackHandler(TelegramCallbackHandler, MenuGeneral):
             await callback.original.message.answer(msg.STOP_TRACKING_ACTIVITY, reply_markup=started_activities_keyboard)
         else:
             await callback.original.message.answer(msg.STOP_TRACKING_NOTHING)
-            await self._show_menu(callback.original.message)
+            await self._show_menu(callback.original.message, callback.user_id)
 
 
 class StopTrackingAfterVoteCallbackHandler(TelegramCallbackHandler, MenuGeneral):
     MARKER = 'stpa'
 
     def __init__(self, activity_service: ActivityService, event_service: EventService):
-        super().__init__()
-        self.activity_service = activity_service
+        TelegramCallbackHandler.__init__(self)
+        MenuGeneral.__init__(self, activity_service)
         self.event_service = event_service
 
     async def handle_(self, callback: CallbackMeta):
@@ -46,4 +46,4 @@ class StopTrackingAfterVoteCallbackHandler(TelegramCallbackHandler, MenuGeneral)
         hours, minutes = self.event_service.finish_and_calculate_time(callback.user_id, activity.id, callback.time)
         await callback.original.message.answer(msg.STOP_TRACKING_DONE.format(activity.name, hours, minutes))
         time.sleep(1)
-        await self._show_menu(callback.original.message)
+        await self._show_menu(callback.original.message, callback.user_id)

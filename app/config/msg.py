@@ -1,7 +1,7 @@
 MENU = """
 With me, you will know how really you spend your life 🚀
 Let's analyze your time!
-
+{}
 🪄 Choose:
 """
 

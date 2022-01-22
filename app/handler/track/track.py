@@ -65,8 +65,8 @@ class TrackAfterActivityCallbackHandler(TelegramCallbackHandler):
 
 class TrackAfterTimeAnswerHandler(TelegramMessageHandler, MenuGeneral):
     def __init__(self, activity_service: ActivityService, event_service: EventService):
-        super().__init__()
-        self.activity_service = activity_service
+        TelegramMessageHandler.__init__(self)
+        MenuGeneral.__init__(self, activity_service)
         self.event_service = event_service
 
     async def handle_(self, message: MessageMeta, *args):
