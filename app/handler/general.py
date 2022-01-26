@@ -46,7 +46,7 @@ class TelegramMessageHandler:
             await self.handle_(MessageMeta(message, msg_time), *args)
         except Exception as e:
             print(e)
-            await message.answer(user_id, msg.ERROR_BASIC)
+            await message.answer(msg.ERROR_BASIC)
 
     async def handle_(self, message: MessageMeta, *args):
         """Response to Message"""
@@ -71,7 +71,7 @@ class TelegramCallbackHandler:
             await self.handle_(CallbackMeta(call, time=callback_time))
         except Exception as e:
             print(e)
-            await call.answer(user_id, msg.ERROR_BASIC)
+            await call.message.answer(msg.ERROR_BASIC)
 
     async def handle_(self, call: CallbackMeta):
         """Response to Callback Message"""
