@@ -14,6 +14,12 @@ def timedelta_to_minutes(spent: timedelta) -> int:
     return spent_minutes
 
 
+def minutes_to_str_time(minutes: int) -> str:
+    hours = int(minutes / 60)
+    minutes = minutes - (hours * 60)
+    return f'{hours}h {minutes}m'
+
+
 def count_difference(start_time: datetime, stop_time: datetime):
     days_difference = stop_time.day - stop_time.day
     hours_difference = stop_time.hour - start_time.hour
