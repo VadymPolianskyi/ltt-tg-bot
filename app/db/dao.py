@@ -188,6 +188,8 @@ class StatisticsSelector(Dao):
         super().__init__()
         self.__activity_table_name = config.DB_TABLE_ACTIVITY
         self.__event_table_name = config.DB_TABLE_EVENT
+        self.__category_table_name = config.DB_TABLE_CATEGORY
+        self.__ = config.DB_TABLE_EVENT
 
         self.__query_parameters = tuple()
         self.__dynamic_conditions = str()
@@ -264,10 +266,11 @@ class StatisticsSelector(Dao):
                     ( 
                         SELECT * FROM `{self.__event_table_name}` WHERE type=%s AND user_id=%s
                     ) 
-                    SELECT DATE(stop_ev.time) as ev_date, TIMEDIFF(stop_ev.time, start_ev.time) AS spent, a.name as activity, stop_ev.id AS event_id
+                    SELECT DATE(stop_ev.time) as ev_date, TIMEDIFF(stop_ev.time, start_ev.time) AS spent, c.name as category, a.name as activity, stop_ev.id AS event_id
                     FROM {self.__event_table_name} as stop_ev 
                     JOIN start_ev on stop_ev.last=start_ev.id 
                     JOIN {self.__activity_table_name} as a on stop_ev.activity_id=a.id 
+                    JOIN {self.__category_table_name} as c on a.category_id=c.id
                     WHERE stop_ev.type=%s  AND stop_ev.user_id=%s {self.__dynamic_conditions}
                     {self.__order} {self.__limit}
                 """
