@@ -3,7 +3,7 @@ from aiogram import Dispatcher
 from app.config import msg, marker
 from app.handler.activity.activity import GeneralActivityHandler
 from app.handler.general import TelegramCallbackHandler, CallbackMeta
-from app.service import markup
+from app.service import markup, time_service
 from app.service.activity import ActivityService
 from app.service.event import EventService
 from app.service.markup import EMPTY_VOTE_RESULT
@@ -40,7 +40,7 @@ class ListEventsCallbackHandler(TelegramCallbackHandler):
 
         buttons = list()
         for s_i in statistics_with_id:
-            button_name = f'{msg.DELETE_SIGN} {s_i[1].from_date} - {s_i[1].format_spent_minutes()}'
+            button_name = f'{msg.DELETE_SIGN} {s_i[1].from_date} - {time_service.minutes_to_str_time(s_i[1].spent_minutes) }'
             end_event_id = s_i[0]
             element = (button_name, DeleteEventBeforeVoteCallbackHandler.MARKER, end_event_id)
             buttons.append(element)

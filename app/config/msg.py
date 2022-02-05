@@ -102,6 +102,8 @@ TIMEZONE_EDIT = "🌏 Please write your Time Zone in the format `Continent/City`
 TIMEZONE_DONE = "✅ Time Zone is changed on `{}`"
 
 # /statistics
+STATISTICS_CATEGORY_RESULT = CATEGORY_SIGN + ' `{}`:\n{}'
+
 
 STATISTIC_PERIOD = "📆 Please write period \nExamples: `1D`, `1W`, `1M` for last time range, or `01.01.2021 - 05.01.2021`"
 STATISTIC_RESULT = '📊 Full Report for ({}) \n\n{}'

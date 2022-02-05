@@ -64,13 +64,18 @@ class Event:
 
 
 class EventStatistic:
-    def __init__(self, date: datetime, spent: timedelta, activity_name: str, stop_event_id: str):
+    def __init__(self, date: datetime, spent: timedelta, category_name: str, activity_name: str, stop_event_id: str):
         self.date: datetime = date
         self.spent: timedelta = spent
+        self.category_name: str = category_name
         self.activity_name: str = activity_name
         self.stop_event_id: str = stop_event_id
 
     @classmethod
     def from_dict(cls, r):
-        return EventStatistic(date=r['ev_date'], spent=r['spent'], activity_name=r['activity'],
-                              stop_event_id=r['event_id'])
+        return EventStatistic(date=r['ev_date'],
+                              spent=r['spent'],
+                              category_name=r['category'],
+                              activity_name=r['activity'],
+                              stop_event_id=r['event_id']
+                              )
